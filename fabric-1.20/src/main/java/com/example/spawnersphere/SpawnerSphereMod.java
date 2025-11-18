@@ -119,7 +119,7 @@ public class SpawnerSphereMod implements ClientModInitializer {
             double distance = client.player.getPos().distanceTo(
                 Vec3d.ofCenter(spawnerPos)
             );
-            
+
             if (distance < SCAN_RADIUS + SPHERE_RADIUS) {
                 renderSphere(
                     matrices,
@@ -128,7 +128,7 @@ public class SpawnerSphereMod implements ClientModInitializer {
                     spawnerPos.getY() + 0.5,
                     spawnerPos.getZ() + 0.5,
                     SPHERE_RADIUS,
-                    distance <= SPHERE_RADIUS ? 0.2f : 0.1f
+                    distance <= SPHERE_RADIUS
                 );
             }
         }
@@ -136,11 +136,19 @@ public class SpawnerSphereMod implements ClientModInitializer {
         matrices.pop();
     }
     
-    private void renderSphere(MatrixStack matrices, VertexConsumerProvider vertexConsumers, 
-                              double x, double y, double z, float radius, float alpha) {
+    private void renderSphere(MatrixStack matrices, VertexConsumerProvider vertexConsumers,
+                              double x, double y, double z, float radius, boolean inRange) {
         VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
         Matrix4f matrix = matrices.peek().getPositionMatrix();
-        
+
+        // Color based on whether player is in range
+        // Outside range: Green/Yellow (0.5, 1.0, 0.0)
+        // Inside range: Yellow/Red (1.0, 0.5, 0.0)
+        float r = inRange ? 1.0f : 0.5f;
+        float g = inRange ? 0.5f : 1.0f;
+        float b = 0.0f;
+        float alpha = inRange ? 0.4f : 0.2f;
+
         // Draw latitude circles
         int segments = 32;
         for (int lat = -8; lat <= 8; lat++) {
@@ -157,28 +165,28 @@ public class SpawnerSphereMod implements ClientModInitializer {
                 float z1 = circleRadius * (float) Math.sin(angle1);
                 float x2 = circleRadius * (float) Math.cos(angle2);
                 float z2 = circleRadius * (float) Math.sin(angle2);
-                
+
                 vertexConsumer.vertex(matrix, (float)(x + x1), (float)(y + circleY), (float)(z + z1))
-                    .color(0.0f, 1.0f, 0.0f, alpha).normal(0, 1, 0);
+                    .color(r, g, b, alpha).normal(0, 1, 0);
                 vertexConsumer.vertex(matrix, (float)(x + x2), (float)(y + circleY), (float)(z + z2))
-                    .color(0.0f, 1.0f, 0.0f, alpha).normal(0, 1, 0);
+                    .color(r, g, b, alpha).normal(0, 1, 0);
             }
         }
         
-        // Draw equator with different color
+        // Draw equator (slightly brighter)
         for (int i = 0; i <= segments; i++) {
             float angle1 = (float) (2 * Math.PI * i / segments);
             float angle2 = (float) (2 * Math.PI * ((i + 1) % segments) / segments);
-            
+
             float x1 = radius * (float) Math.cos(angle1);
             float z1 = radius * (float) Math.sin(angle1);
             float x2 = radius * (float) Math.cos(angle2);
             float z2 = radius * (float) Math.sin(angle2);
-            
+
             vertexConsumer.vertex(matrix, (float)(x + x1), (float)y, (float)(z + z1))
-                .color(1.0f, 1.0f, 0.0f, alpha * 1.5f).normal(0, 1, 0);
+                .color(r, g, b, alpha * 1.5f).normal(0, 1, 0);
             vertexConsumer.vertex(matrix, (float)(x + x2), (float)y, (float)(z + z2))
-                .color(1.0f, 1.0f, 0.0f, alpha * 1.5f).normal(0, 1, 0);
+                .color(r, g, b, alpha * 1.5f).normal(0, 1, 0);
         }
         
         // Draw longitude circles
@@ -196,11 +204,11 @@ public class SpawnerSphereMod implements ClientModInitializer {
                 float x2 = radius * (float) (Math.sin(angle2) * Math.cos(lonAngle));
                 float y2 = radius * (float) Math.cos(angle2);
                 float z2 = radius * (float) (Math.sin(angle2) * Math.sin(lonAngle));
-                
+
                 vertexConsumer.vertex(matrix, (float)(x + x1), (float)(y + y1), (float)(z + z1))
-                    .color(0.0f, 1.0f, 0.0f, alpha).normal(0, 1, 0);
+                    .color(r, g, b, alpha).normal(0, 1, 0);
                 vertexConsumer.vertex(matrix, (float)(x + x2), (float)(y + y2), (float)(z + z2))
-                    .color(0.0f, 1.0f, 0.0f, alpha).normal(0, 1, 0);
+                    .color(r, g, b, alpha).normal(0, 1, 0);
             }
         }
     }

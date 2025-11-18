@@ -112,7 +112,7 @@ public class SpawnerSphereMod implements ClientModInitializer {
             }
             
             double distance = client.player.getPos().distanceTo(Vec3d.ofCenter(spawnerPos));
-            
+
             if (distance < SCAN_RADIUS + SPHERE_RADIUS) {
                 renderSphere(
                     matrices,
@@ -121,7 +121,7 @@ public class SpawnerSphereMod implements ClientModInitializer {
                     spawnerPos.getY() + 0.5,
                     spawnerPos.getZ() + 0.5,
                     SPHERE_RADIUS,
-                    distance <= SPHERE_RADIUS ? 0.3f : 0.15f
+                    distance <= SPHERE_RADIUS
                 );
             }
         }
@@ -129,11 +129,19 @@ public class SpawnerSphereMod implements ClientModInitializer {
         matrices.pop();
     }
     
-    private void renderSphere(MatrixStack matrices, VertexConsumerProvider vertexConsumers, 
-                              double x, double y, double z, float radius, float alpha) {
+    private void renderSphere(MatrixStack matrices, VertexConsumerProvider vertexConsumers,
+                              double x, double y, double z, float radius, boolean inRange) {
         VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
         Matrix4f matrix = matrices.peek().getPositionMatrix();
-        
+
+        // Color based on whether player is in range
+        // Outside range: Green/Yellow (0.5, 1.0, 0.0)
+        // Inside range: Yellow/Red (1.0, 0.5, 0.0)
+        float r = inRange ? 1.0f : 0.5f;
+        float g = inRange ? 0.5f : 1.0f;
+        float b = 0.0f;
+        float alpha = inRange ? 0.4f : 0.2f;
+
         int segments = 24;
         
         // Draw latitude circles
@@ -150,11 +158,11 @@ public class SpawnerSphereMod implements ClientModInitializer {
                 float z1 = circleRadius * (float) Math.sin(angle1);
                 float x2 = circleRadius * (float) Math.cos(angle2);
                 float z2 = circleRadius * (float) Math.sin(angle2);
-                
+
                 vertexConsumer.vertex(matrix, (float)(x + x1), (float)(y + circleY), (float)(z + z1))
-                    .color(0.0f, 1.0f, 0.0f, alpha).normal(0, 1, 0);
+                    .color(r, g, b, alpha).normal(0, 1, 0);
                 vertexConsumer.vertex(matrix, (float)(x + x2), (float)(y + circleY), (float)(z + z2))
-                    .color(0.0f, 1.0f, 0.0f, alpha).normal(0, 1, 0);
+                    .color(r, g, b, alpha).normal(0, 1, 0);
             }
         }
         
@@ -173,11 +181,11 @@ public class SpawnerSphereMod implements ClientModInitializer {
                 float x2 = radius * (float) (Math.sin(angle2) * Math.cos(lonAngle));
                 float y2 = radius * (float) Math.cos(angle2);
                 float z2 = radius * (float) (Math.sin(angle2) * Math.sin(lonAngle));
-                
+
                 vertexConsumer.vertex(matrix, (float)(x + x1), (float)(y + y1), (float)(z + z1))
-                    .color(0.0f, 1.0f, 0.0f, alpha).normal(0, 1, 0);
+                    .color(r, g, b, alpha).normal(0, 1, 0);
                 vertexConsumer.vertex(matrix, (float)(x + x2), (float)(y + y2), (float)(z + z2))
-                    .color(0.0f, 1.0f, 0.0f, alpha).normal(0, 1, 0);
+                    .color(r, g, b, alpha).normal(0, 1, 0);
             }
         }
     }

@@ -144,15 +144,17 @@ public class SpawnerSphereMod implements ClientModInitializer {
         }
     }
     
-    private void renderSphere(MatrixStack matrices, VertexConsumer vertexConsumer, 
+    private void renderSphere(MatrixStack matrices, VertexConsumer vertexConsumer,
                               double x, double y, double z, float radius, boolean inRange) {
         Matrix4f matrix = matrices.peek().getPositionMatrix();
-        
+
         // Color based on whether player is in range
-        float r = inRange ? 1.0f : 0.0f;
-        float g = 1.0f;
-        float b = inRange ? 0.0f : 0.0f;
-        float alpha = inRange ? 0.3f : 0.15f;
+        // Outside range: Green/Yellow (0.5, 1.0, 0.0)
+        // Inside range: Yellow/Red (1.0, 0.5, 0.0)
+        float r = inRange ? 1.0f : 0.5f;
+        float g = inRange ? 0.5f : 1.0f;
+        float b = 0.0f;
+        float alpha = inRange ? 0.4f : 0.2f;
         
         int segments = 24;
         
@@ -173,9 +175,9 @@ public class SpawnerSphereMod implements ClientModInitializer {
                 
                 // Draw line segment
                 vertexConsumer.vertex(matrix, (float)(x + x1), (float)(y + circleY), (float)(z + z1))
-                    .color(r, g, b, alpha);
+                    .color(r, g, b, alpha).normal(0, 1, 0);
                 vertexConsumer.vertex(matrix, (float)(x + x2), (float)(y + circleY), (float)(z + z2))
-                    .color(r, g, b, alpha);
+                    .color(r, g, b, alpha).normal(0, 1, 0);
             }
         }
         
@@ -197,9 +199,9 @@ public class SpawnerSphereMod implements ClientModInitializer {
                 
                 // Draw line segment
                 vertexConsumer.vertex(matrix, (float)(x + x1), (float)(y + y1), (float)(z + z1))
-                    .color(r, g, b, alpha);
+                    .color(r, g, b, alpha).normal(0, 1, 0);
                 vertexConsumer.vertex(matrix, (float)(x + x2), (float)(y + y2), (float)(z + z2))
-                    .color(r, g, b, alpha);
+                    .color(r, g, b, alpha).normal(0, 1, 0);
             }
         }
     }

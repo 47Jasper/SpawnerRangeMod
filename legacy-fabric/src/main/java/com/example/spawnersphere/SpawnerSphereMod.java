@@ -118,14 +118,14 @@ public class SpawnerSphereMod implements ClientModInitializer {
                 spawnerPos.getZ() + 0.5
             );
             distance = Math.sqrt(distance);
-            
+
             if (distance < SCAN_RADIUS + SPHERE_RADIUS) {
                 renderSphere(
                     spawnerPos.getX() + 0.5,
                     spawnerPos.getY() + 0.5,
                     spawnerPos.getZ() + 0.5,
                     SPHERE_RADIUS,
-                    distance <= SPHERE_RADIUS ? 0.4f : 0.2f
+                    distance <= SPHERE_RADIUS
                 );
             }
         }
@@ -136,14 +136,22 @@ public class SpawnerSphereMod implements ClientModInitializer {
         GL11.glPopMatrix();
     }
     
-    private static void renderSphere(double x, double y, double z, float radius, float alpha) {
+    private static void renderSphere(double x, double y, double z, float radius, boolean inRange) {
         Tessellator tessellator = Tessellator.getInstance();
         VertexBuffer buffer = tessellator.getBuffer();
-        
+
+        // Color based on whether player is in range
+        // Outside range: Green/Yellow (0.5, 1.0, 0.0)
+        // Inside range: Yellow/Red (1.0, 0.5, 0.0)
+        float r = inRange ? 1.0f : 0.5f;
+        float g = inRange ? 0.5f : 1.0f;
+        float b = 0.0f;
+        float alpha = inRange ? 0.4f : 0.2f;
+
         int segments = 32;
-        
+
         // Draw latitude circles
-        GL11.glColor4f(0.0f, 1.0f, 0.0f, alpha);
+        GL11.glColor4f(r, g, b, alpha);
         for (int lat = -8; lat <= 8; lat++) {
             if (lat == 0) continue;
             float latAngle = (float) (lat * Math.PI / 16);
@@ -160,8 +168,8 @@ public class SpawnerSphereMod implements ClientModInitializer {
             tessellator.draw();
         }
         
-        // Draw equator
-        GL11.glColor4f(1.0f, 1.0f, 0.0f, alpha * 1.5f);
+        // Draw equator (slightly brighter)
+        GL11.glColor4f(r, g, b, alpha * 1.5f);
         buffer.begin(GL11.GL_LINE_LOOP, VertexFormats.POSITION);
         for (int i = 0; i <= segments; i++) {
             float angle = (float) (2 * Math.PI * i / segments);
@@ -172,7 +180,7 @@ public class SpawnerSphereMod implements ClientModInitializer {
         tessellator.draw();
         
         // Draw longitude circles
-        GL11.glColor4f(0.0f, 1.0f, 0.0f, alpha);
+        GL11.glColor4f(r, g, b, alpha);
         for (int lon = 0; lon < 8; lon++) {
             float lonAngle = (float) (lon * Math.PI / 8);
             
