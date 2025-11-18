@@ -4,12 +4,14 @@ rootProject.name = 'spawner-sphere-mod'
 include 'common'
 
 // Fabric modules
-include 'legacy-fabric'  // 1.8.9 - 1.13.2
-include 'fabric-1.14'    // 1.14 - 1.16.5
-include 'fabric-1.17'    // 1.17 - 1.18.2
-include 'fabric-1.19'    // 1.19 - 1.19.4
-include 'fabric-1.20'    // 1.20 - 1.20.4
-include 'fabric-1.21'    // 1.21 - 1.21.4
+include 'legacy-fabric'   // 1.8.9 - 1.13.2
+include 'fabric-1.14'     // 1.14 - 1.16.5
+include 'fabric-1.17'     // 1.17 - 1.18.2
+include 'fabric-1.19'     // 1.19 - 1.19.4
+include 'fabric-1.20'     // 1.20 - 1.20.4
+include 'fabric-1.21'     // 1.21.0 - 1.21.4
+include 'fabric-1.21.5'   // 1.21.5 - 1.21.8
+include 'fabric-1.21.9'   // 1.21.9 - 1.21.10
 
 // Forge modules
 include 'forge-1.12'     // 1.8.9 - 1.12.2
