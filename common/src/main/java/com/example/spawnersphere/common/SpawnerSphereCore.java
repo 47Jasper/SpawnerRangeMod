@@ -238,6 +238,26 @@ public class SpawnerSphereCore {
     }
 
     /**
+     * Trigger a rescan immediately (e.g., when spawner placed nearby)
+     * This bypasses the normal scan interval and movement threshold
+     */
+    public void triggerRescan(Object player, Object world) {
+        if (enabled) {
+            scanForSpawners(player, world);
+        }
+    }
+
+    /**
+     * Check if a position is within scan radius to determine if rescan should be triggered
+     */
+    public boolean isWithinScanRadius(Position position, Object player) {
+        if (!enabled) return false;
+        Position playerPos = platformHelper.getPlayerPosition(player);
+        double distance = playerPos.distanceTo(position);
+        return distance <= config.getScanRadius();
+    }
+
+    /**
      * Data class to hold spawner position information
      */
     private static class SpawnerData {

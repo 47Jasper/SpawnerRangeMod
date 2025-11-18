@@ -122,14 +122,40 @@ To build all supported versions at once:
 
 ## Configuration
 
-The keybind can be changed in Minecraft's Controls settings under the "Spawner Sphere" category.
+### Keybindings
+The toggle keybind can be changed in Minecraft's Controls settings under the "Spawner Sphere" category.
+
+### Default Values
+- **Sphere Radius**: 16 blocks (Minecraft's spawner activation range)
+- **Scan Radius**: 64 blocks (how far to search for spawners)
+- **Scan Interval**: 60 seconds (how often to scan for new spawners)
+- **Colors**: Green/yellow when outside range, yellow/red when inside
+- **Performance**: Spatial indexing and LOD enabled by default
+
+### Configuration GUI (Optional)
+
+The mod includes infrastructure for configuration GUI using Cloth Config:
+- **Fabric**: Integrates with Mod Menu for easy configuration
+- **Forge**: Uses Forge config screen system
+- **See**: `CONFIG_GUI_INTEGRATION.md` for integration guide
+
+**Available Settings**:
+- Sphere and scan radius adjustment
+- Scan interval and movement threshold
+- Custom colors (RGB/Alpha)
+- Performance optimizations (spatial indexing, LOD, frustum culling)
+- Rendering quality (segment count, LOD settings)
+- Distance display toggle
+
+**Note**: Config GUI is optional. Mod works with sensible defaults if not configured.
 
 ## Technical Details
 
 - **Activation Range**: Mob spawners activate when a player is within 16 blocks (Euclidean distance)
 - **Scan Range**: The mod scans for spawners within 64 blocks of the player
-- **Rescan Interval**: Automatic rescan every 5 seconds when enabled
+- **Rescan Interval**: Automatic rescan every 60 seconds, or when player moves 16+ blocks
 - **Rendering**: Uses wireframe rendering with transparency for minimal visual obstruction
+- **Performance**: Chunk-based spatial indexing and level-of-detail system for efficiency
 
 ## Compatibility
 

@@ -30,33 +30,38 @@
 
 ## 🎯 High Priority Enhancements
 
-### 1. Configuration GUI
+### 1. Configuration GUI ✅ INFRASTRUCTURE COMPLETE
 **Priority**: High
-**Estimated Effort**: 3-4 hours
+**Status**: ✅ Infrastructure complete, per-module integration optional
 
-**Description**: Add a configuration GUI using Cloth Config or YACL
+**Description**: Add a configuration GUI using Cloth Config
 
-**Features Needed**:
-- Keybinding configuration (already works in controls)
-- Sphere radius adjustment (default: 16)
-- Scan radius adjustment (default: 64)
-- Scan interval adjustment (default: 5000ms)
-- Color customization (RGB sliders)
-- Rendering quality (segment count)
-- Toggle distance display in action bar
+**Infrastructure Implemented**:
+- ✅ `IConfigScreen` interface for platform-agnostic config screens
+- ✅ `ConfigScreenFactory` for registering config implementations
+- ✅ `ModConfig` with all getters/setters for configuration
+- ✅ Comprehensive integration guide in CONFIG_GUI_INTEGRATION.md
+- ✅ Reference implementation code provided
+- ✅ Trigger methods for event-based rescanning
 
-**Implementation**:
-- Add Cloth Config or YACL dependency
-- Create config screen registration
-- Bind config to ModConfig class
-- Save/load from config file
-- Support for both Fabric and Forge config systems
+**Available Configuration Options**:
+- Sphere radius (1-64, default: 16)
+- Scan radius (16-256, default: 64)
+- Scan interval (1000+ms, default: 60000ms)
+- Inside/outside range colors (RGBA)
+- Performance toggles (spatial indexing, LOD, frustum culling)
+- LOD settings (max/min segments, distance)
+- Movement threshold (1-64, default: 16)
+- Rendering options (segments, equator, distance display)
 
-**Files to Modify/Create**:
-- Add config dependency to all build.gradle files
-- Create `ConfigScreen.java` for each loader
-- Modify `ModConfig` to support save/load
-- Add config file handling
+**Per-Module Integration** (Optional):
+- See CONFIG_GUI_INTEGRATION.md for step-by-step guide
+- Add Cloth Config dependency to module's build.gradle
+- Create ClothConfigScreen implementation
+- Register with ConfigScreenFactory on init
+- Add Mod Menu integration (Fabric) or Forge config screen
+
+**Note**: Config GUI is **optional**. Mod works with defaults if not configured.
 
 ### 2. Additional Localization
 **Priority**: Medium

@@ -8,7 +8,7 @@ public class ModConfig {
     // Sphere rendering
     private int sphereRadius = 16;
     private int scanRadius = 64;
-    private long scanInterval = 5000; // milliseconds
+    private long scanInterval = 60000; // milliseconds (60 seconds)
 
     // Colors (RGB 0-255)
     private ColorConfig outsideRangeColor = new ColorConfig(128, 255, 0, 51);  // Green/Yellow
