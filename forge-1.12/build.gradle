@@ -1,0 +1,38 @@
+plugins {
+    id 'net.minecraftforge.gradle'
+}
+
+minecraft {
+    mappings channel: 'stable', version: '39-1.12'
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+        }
+    }
+}
+
+dependencies {
+    // Common module
+    implementation project(':common')
+
+    minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2859'
+}
+
+jar {
+    manifest {
+        attributes([
+            "FMLCorePlugin": "",
+            "FMLCorePluginContainsFMLMod": "true",
+            "Specification-Title": "spawnersphere",
+            "Specification-Vendor": "SpawnerSphere Team",
+            "Specification-Version": "1",
+            "Implementation-Title": project.name,
+            "Implementation-Version": project.version,
+            "Implementation-Vendor": "SpawnerSphere Team",
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
