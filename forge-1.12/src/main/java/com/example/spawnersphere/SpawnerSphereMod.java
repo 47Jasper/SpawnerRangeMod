@@ -2,6 +2,7 @@ package com.example.spawnersphere;
 
 import com.example.spawnersphere.common.SpawnerSphereCore;
 import com.example.spawnersphere.common.config.ModConfig;
+import com.example.spawnersphere.config.ForgeConfigGui;
 import com.example.spawnersphere.platform.ForgePlatformHelper;
 import com.example.spawnersphere.platform.ForgeRenderer;
 import net.minecraft.client.Minecraft;
@@ -25,7 +26,8 @@ import org.lwjgl.opengl.GL11;
     name = "Spawner Sphere",
     version = "1.0.0",
     clientSideOnly = true,
-    acceptedMinecraftVersions = "[1.8.9,1.13)"
+    acceptedMinecraftVersions = "[1.8.9,1.13)",
+    guiFactory = "com.example.spawnersphere.config.ForgeConfigGuiFactory"
 )
 public class SpawnerSphereMod {
 
@@ -36,6 +38,13 @@ public class SpawnerSphereMod {
     private static Minecraft mc;
 
     @Mod.EventHandler
+    public void preInit(net.minecraftforge.fml.common.event.FMLPreInitializationEvent event) {
+        // Initialize Forge config
+        ModConfig config = new ModConfig();
+        ForgeConfigGui.init(event.getSuggestedConfigurationFile(), config);
+    }
+
+    @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         mc = Minecraft.getMinecraft();
 
@@ -43,6 +52,9 @@ public class SpawnerSphereMod {
         ModConfig config = new ModConfig();
         ForgePlatformHelper platformHelper = new ForgePlatformHelper();
         ForgeRenderer renderer = new ForgeRenderer();
+
+        // Reinitialize config from saved values
+        ForgeConfigGui.init(new java.io.File(mc.mcDataDir, "config/spawnersphere.cfg"), config);
 
         core = new SpawnerSphereCore(platformHelper, renderer, config);
 

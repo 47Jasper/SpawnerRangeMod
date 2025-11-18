@@ -2,6 +2,8 @@ package com.example.spawnersphere;
 
 import com.example.spawnersphere.common.SpawnerSphereCore;
 import com.example.spawnersphere.common.config.ModConfig;
+import com.example.spawnersphere.config.ForgeConfigScreen;
+import com.example.spawnersphere.config.ForgeModConfig;
 import com.example.spawnersphere.platform.ForgePlatformHelper;
 import com.example.spawnersphere.platform.ForgeRenderer;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -32,13 +34,25 @@ public class SpawnerSphereMod {
     private static KeyBinding toggleKey;
 
     public SpawnerSphereMod() {
+        // Register Forge config
+        ForgeModConfig.register();
+
         // Register ourselves for client setup
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientSetup);
+
+        // Register config screen factory
+        net.minecraftforge.fml.ExtensionPoint.CONFIGGUIFACTORY.register(
+            () -> (mc, screen) -> new ForgeConfigScreen(screen, new ModConfig())
+        );
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {
         // Initialize the common core with platform-specific implementations
         ModConfig config = new ModConfig();
+
+        // Sync from Forge config
+        ForgeModConfig.syncToModConfig(config);
+
         ForgePlatformHelper platformHelper = new ForgePlatformHelper();
         ForgeRenderer renderer = new ForgeRenderer();
 

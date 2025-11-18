@@ -2,6 +2,8 @@ package com.example.spawnersphere;
 
 import com.example.spawnersphere.common.SpawnerSphereCore;
 import com.example.spawnersphere.common.config.ModConfig;
+import com.example.spawnersphere.config.JsonConfigManager;
+import com.example.spawnersphere.config.LegacyConfigScreen;
 import com.example.spawnersphere.platform.LegacyFabricPlatformHelper;
 import com.example.spawnersphere.platform.LegacyFabricRenderer;
 import net.fabricmc.api.ClientModInitializer;
@@ -17,24 +19,36 @@ import org.lwjgl.opengl.GL11;
 public class SpawnerSphereMod implements ClientModInitializer {
 
     private static SpawnerSphereCore core;
+    private static ModConfig config;
     private static KeyBinding toggleKey;
+    private static KeyBinding configKey;
     private static MinecraftClient client;
 
     @Override
     public void onInitializeClient() {
         client = MinecraftClient.getInstance();
 
+        // Initialize config from file
+        config = new ModConfig();
+        java.io.File configFile = new java.io.File(client.runDirectory, "config/spawnersphere.json");
+        JsonConfigManager.load(configFile, config);
+
         // Initialize the common core with platform-specific implementations
-        ModConfig config = new ModConfig();
         LegacyFabricPlatformHelper platformHelper = new LegacyFabricPlatformHelper();
         LegacyFabricRenderer renderer = new LegacyFabricRenderer();
 
         core = new SpawnerSphereCore(platformHelper, renderer, config);
 
-        // Register keybinding
+        // Register keybindings
         toggleKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
             "key.spawnersphere.toggle",
             Keyboard.KEY_B,
+            "category.spawnersphere"
+        ));
+
+        configKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+            "key.spawnersphere.config",
+            Keyboard.KEY_O,
             "category.spawnersphere"
         ));
     }
@@ -47,6 +61,10 @@ public class SpawnerSphereMod implements ClientModInitializer {
             if (client.player != null && client.world != null) {
                 core.toggle(client.player, client.world);
             }
+        }
+
+        if (configKey != null && configKey.wasPressed()) {
+            client.displayGuiScreen(new LegacyConfigScreen(null, config));
         }
 
         // Periodic tick for scanning
