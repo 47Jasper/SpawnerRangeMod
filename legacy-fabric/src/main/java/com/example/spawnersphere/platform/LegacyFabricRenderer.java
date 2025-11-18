@@ -21,13 +21,12 @@ public class LegacyFabricRenderer implements IRenderer {
         double y,
         double z,
         float radius,
-        @NotNull SphereColor color
+        @NotNull SphereColor color,
+        int segments
     ) {
         // Legacy versions don't use a context object
         Tessellator tessellator = Tessellator.getInstance();
         VertexBuffer buffer = tessellator.getBuffer();
-
-        int segments = DEFAULT_SEGMENTS;
 
         // Draw latitude circles
         GL11.glColor4f(color.red, color.green, color.blue, color.alpha);

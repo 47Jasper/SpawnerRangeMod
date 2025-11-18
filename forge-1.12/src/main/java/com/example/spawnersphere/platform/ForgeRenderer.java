@@ -23,13 +23,12 @@ public class ForgeRenderer implements IRenderer {
         double y,
         double z,
         float radius,
-        @NotNull SphereColor color
+        @NotNull SphereColor color,
+        int segments
     ) {
         // Legacy versions don't use a context object
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
-
-        int segments = DEFAULT_SEGMENTS;
 
         // Setup GL state
         GlStateManager.color(color.red, color.green, color.blue, color.alpha);

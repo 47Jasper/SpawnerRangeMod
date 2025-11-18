@@ -24,7 +24,8 @@ public class FabricRenderer implements IRenderer {
         double y,
         double z,
         float radius,
-        @NotNull SphereColor color
+        @NotNull SphereColor color,
+        int segments
     ) {
         if (!(context instanceof RenderContext)) {
             return;
@@ -36,8 +37,6 @@ public class FabricRenderer implements IRenderer {
 
         VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
         Matrix4f matrix = matrices.peek().getModel();
-
-        int segments = DEFAULT_SEGMENTS;
 
         // Draw horizontal circles (latitude)
         for (int lat = -6; lat <= 6; lat += 2) {

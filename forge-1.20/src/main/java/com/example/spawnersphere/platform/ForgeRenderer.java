@@ -22,7 +22,8 @@ public class ForgeRenderer implements IRenderer {
         double y,
         double z,
         float radius,
-        @NotNull SphereColor color
+        @NotNull SphereColor color,
+        int segments
     ) {
         if (!(context instanceof RenderContext)) {
             return;
@@ -34,8 +35,6 @@ public class ForgeRenderer implements IRenderer {
 
         VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.lines());
         Matrix4f matrix = poseStack.last().pose();
-
-        int segments = DEFAULT_SEGMENTS;
 
         // Draw horizontal circles (latitude)
         for (int lat = -6; lat <= 6; lat += 2) {

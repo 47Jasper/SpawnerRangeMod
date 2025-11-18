@@ -16,6 +16,7 @@ public interface IRenderer {
      * @param z Center Z coordinate
      * @param radius Sphere radius
      * @param color Color information
+     * @param segments Number of segments for sphere rendering (LOD support)
      */
     void renderSphere(
         @NotNull Object context,
@@ -23,7 +24,8 @@ public interface IRenderer {
         double y,
         double z,
         float radius,
-        @NotNull SphereColor color
+        @NotNull SphereColor color,
+        int segments
     );
 
     /**

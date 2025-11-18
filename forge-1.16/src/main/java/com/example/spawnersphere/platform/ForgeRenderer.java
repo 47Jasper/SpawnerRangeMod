@@ -27,7 +27,8 @@ public class ForgeRenderer implements IRenderer {
         double y,
         double z,
         float radius,
-        @NotNull SphereColor color
+        @NotNull SphereColor color,
+        int segments
     ) {
         if (!(context instanceof RenderContext)) {
             return;
@@ -45,8 +46,6 @@ public class ForgeRenderer implements IRenderer {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.lineWidth(2.0f);
-
-        int segments = DEFAULT_SEGMENTS;
 
         // Draw horizontal circles (latitude)
         buffer.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);

@@ -19,6 +19,15 @@ public class ModConfig {
     private boolean renderEquator = true;
     private boolean showDistanceInActionBar = false;
 
+    // Performance optimizations
+    private boolean enableSpatialIndexing = true;
+    private boolean enableFrustumCulling = false; // Disabled by default (requires player look vector)
+    private boolean enableLOD = true;
+    private int lodMaxSegments = 32;
+    private int lodMinSegments = 16;
+    private double lodDistance = 32.0; // Distance at which LOD starts reducing detail
+    private double movementThreshold = 16.0; // Player must move this far to trigger rescan
+
     public int getSphereRadius() {
         return sphereRadius;
     }
@@ -73,6 +82,62 @@ public class ModConfig {
 
     public void setShowDistanceInActionBar(boolean showDistanceInActionBar) {
         this.showDistanceInActionBar = showDistanceInActionBar;
+    }
+
+    public boolean isEnableSpatialIndexing() {
+        return enableSpatialIndexing;
+    }
+
+    public void setEnableSpatialIndexing(boolean enableSpatialIndexing) {
+        this.enableSpatialIndexing = enableSpatialIndexing;
+    }
+
+    public boolean isEnableFrustumCulling() {
+        return enableFrustumCulling;
+    }
+
+    public void setEnableFrustumCulling(boolean enableFrustumCulling) {
+        this.enableFrustumCulling = enableFrustumCulling;
+    }
+
+    public boolean isEnableLOD() {
+        return enableLOD;
+    }
+
+    public void setEnableLOD(boolean enableLOD) {
+        this.enableLOD = enableLOD;
+    }
+
+    public int getLodMaxSegments() {
+        return lodMaxSegments;
+    }
+
+    public void setLodMaxSegments(int lodMaxSegments) {
+        this.lodMaxSegments = Math.max(8, Math.min(64, lodMaxSegments));
+    }
+
+    public int getLodMinSegments() {
+        return lodMinSegments;
+    }
+
+    public void setLodMinSegments(int lodMinSegments) {
+        this.lodMinSegments = Math.max(4, Math.min(32, lodMinSegments));
+    }
+
+    public double getLodDistance() {
+        return lodDistance;
+    }
+
+    public void setLodDistance(double lodDistance) {
+        this.lodDistance = Math.max(16.0, Math.min(128.0, lodDistance));
+    }
+
+    public double getMovementThreshold() {
+        return movementThreshold;
+    }
+
+    public void setMovementThreshold(double movementThreshold) {
+        this.movementThreshold = Math.max(1.0, Math.min(64.0, movementThreshold));
     }
 
     public static class ColorConfig {

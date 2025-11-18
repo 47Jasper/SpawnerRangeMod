@@ -1,6 +1,9 @@
 package com.example.spawnersphere.common;
 
 import com.example.spawnersphere.common.config.ModConfig;
+import com.example.spawnersphere.common.performance.FrustumCuller;
+import com.example.spawnersphere.common.performance.LODCalculator;
+import com.example.spawnersphere.common.performance.SpatialIndex;
 import com.example.spawnersphere.common.platform.IPlatformHelper;
 import com.example.spawnersphere.common.platform.IPlatformHelper.Position;
 import com.example.spawnersphere.common.platform.IRenderer;
@@ -9,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -23,7 +27,9 @@ public class SpawnerSphereCore {
 
     private boolean enabled = false;
     private final Set<SpawnerData> spawnerPositions = new HashSet<>();
+    private final SpatialIndex spatialIndex = new SpatialIndex();
     private long lastScanTime = 0;
+    private Position lastScanPosition = null;
 
     public SpawnerSphereCore(
         @NotNull IPlatformHelper platformHelper,
@@ -62,8 +68,18 @@ public class SpawnerSphereCore {
     public void tick(Object player, Object world) {
         if (!enabled) return;
 
+        Position currentPos = platformHelper.getPlayerPosition(player);
         long currentTime = System.currentTimeMillis();
-        if (currentTime - lastScanTime > config.getScanInterval()) {
+        boolean timePassed = currentTime - lastScanTime > config.getScanInterval();
+
+        // Movement-based lazy scanning
+        boolean movedSignificantly = false;
+        if (lastScanPosition != null) {
+            double distance = currentPos.distanceTo(lastScanPosition);
+            movedSignificantly = distance >= config.getMovementThreshold();
+        }
+
+        if (timePassed || movedSignificantly || lastScanPosition == null) {
             scanForSpawners(player, world);
         }
     }
@@ -73,6 +89,7 @@ public class SpawnerSphereCore {
      */
     public void scanForSpawners(Object player, Object world) {
         spawnerPositions.clear();
+        spatialIndex.clear();
         Position playerPos = platformHelper.getPlayerPosition(player);
 
         int scanRadius = config.getScanRadius();
@@ -92,13 +109,20 @@ public class SpawnerSphereCore {
 
                     if (platformHelper.isSpawner(world, blockPos)) {
                         Position center = platformHelper.getBlockCenter(blockPos);
-                        spawnerPositions.add(new SpawnerData(blockPos, center));
+                        SpawnerData data = new SpawnerData(blockPos, center);
+                        spawnerPositions.add(data);
+
+                        // Add to spatial index for efficient queries
+                        if (config.isEnableSpatialIndexing()) {
+                            spatialIndex.add(blockPos, center);
+                        }
                     }
                 }
             }
         }
 
         lastScanTime = System.currentTimeMillis();
+        lastScanPosition = playerPos;
     }
 
     /**
@@ -112,14 +136,37 @@ public class SpawnerSphereCore {
         int sphereRadius = config.getSphereRadius();
         int scanRadius = config.getScanRadius();
 
+        // Determine which spawners to render
+        Set<SpawnerData> spawnersToRender;
+        if (config.isEnableSpatialIndexing()) {
+            // Use spatial index for efficient nearby query
+            List<SpatialIndex.SpawnerEntry> nearbyEntries = spatialIndex.getNearby(
+                playerPos,
+                scanRadius + sphereRadius
+            );
+
+            spawnersToRender = new HashSet<>();
+            for (SpatialIndex.SpawnerEntry entry : nearbyEntries) {
+                // Find corresponding SpawnerData
+                for (SpawnerData data : spawnerPositions) {
+                    if (data.blockPos.equals(entry.blockPos)) {
+                        spawnersToRender.add(data);
+                        break;
+                    }
+                }
+            }
+        } else {
+            spawnersToRender = spawnerPositions;
+        }
+
         // Remove spawners that no longer exist and render the rest
-        Iterator<SpawnerData> iterator = spawnerPositions.iterator();
+        Iterator<SpawnerData> iterator = spawnersToRender.iterator();
         while (iterator.hasNext()) {
             SpawnerData spawner = iterator.next();
 
             // Verify spawner still exists
             if (!platformHelper.isSpawner(world, spawner.blockPos)) {
-                iterator.remove();
+                spawnerPositions.remove(spawner);
                 continue;
             }
 
@@ -128,6 +175,10 @@ public class SpawnerSphereCore {
 
             // Only render if within extended range
             if (distance < scanRadius + sphereRadius) {
+                // Frustum culling (if enabled and look vector available)
+                // Note: This requires platform-specific look vector support
+                // For now, we skip this optimization if not explicitly supported
+
                 // Determine if player is within activation range
                 boolean inRange = distance <= sphereRadius;
 
@@ -146,6 +197,19 @@ public class SpawnerSphereCore {
                         config.getOutsideRangeColor().getAlphaFloat()
                     );
 
+                // Calculate segment count based on distance (LOD)
+                int segments;
+                if (config.isEnableLOD()) {
+                    segments = LODCalculator.calculateSegments(
+                        distance,
+                        config.getLodMaxSegments(),
+                        config.getLodMinSegments(),
+                        config.getLodDistance()
+                    );
+                } else {
+                    segments = config.getSphereSegments();
+                }
+
                 // Render the sphere
                 renderer.renderSphere(
                     renderContext,
@@ -153,7 +217,8 @@ public class SpawnerSphereCore {
                     spawner.center.y,
                     spawner.center.z,
                     sphereRadius,
-                    color
+                    color,
+                    segments
                 );
 
                 // Optionally show distance in action bar
