@@ -1,0 +1,28 @@
+plugins {
+    id 'net.neoforged.gradle'
+}
+
+minecraft {
+    mappings channel: 'official', version: '1.20.6'
+}
+
+dependencies {
+    // Common module
+    implementation project(':common')
+
+    implementation "net.neoforged:neoforge:20.6.119"
+}
+
+jar {
+    manifest {
+        attributes([
+            "Specification-Title": "spawnersphere",
+            "Specification-Vendor": "SpawnerSphere Team",
+            "Specification-Version": "1",
+            "Implementation-Title": project.name,
+            "Implementation-Version": project.version,
+            "Implementation-Vendor": "SpawnerSphere Team",
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}

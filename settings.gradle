@@ -1,9 +1,22 @@
 rootProject.name = 'spawner-sphere-mod'
 
+// Common module
 include 'common'
+
+// Fabric modules
 include 'legacy-fabric'  // 1.8.9 - 1.13.2
 include 'fabric-1.14'    // 1.14 - 1.16.5
 include 'fabric-1.17'    // 1.17 - 1.18.2
 include 'fabric-1.19'    // 1.19 - 1.19.4
 include 'fabric-1.20'    // 1.20 - 1.20.4
 include 'fabric-1.21'    // 1.21 - 1.21.4
+
+// Forge modules
+include 'forge-1.12'     // 1.8.9 - 1.12.2
+include 'forge-1.16'     // 1.13 - 1.16.5
+include 'forge-1.19'     // 1.17 - 1.19.x
+include 'forge-1.20'     // 1.20 - 1.20.4
+
+// NeoForge modules
+include 'neoforge-1.20'  // 1.20.5+
+
