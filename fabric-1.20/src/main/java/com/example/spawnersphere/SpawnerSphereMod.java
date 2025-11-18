@@ -1,7 +1,9 @@
 package com.example.spawnersphere;
 
 import com.example.spawnersphere.common.SpawnerSphereCore;
+import com.example.spawnersphere.common.config.ConfigScreenFactory;
 import com.example.spawnersphere.common.config.ModConfig;
+import com.example.spawnersphere.config.ClothConfigScreen;
 import com.example.spawnersphere.platform.FabricPlatformHelper;
 import com.example.spawnersphere.platform.FabricRenderer;
 import net.fabricmc.api.ClientModInitializer;
@@ -32,6 +34,9 @@ public class SpawnerSphereMod implements ClientModInitializer {
         FabricRenderer renderer = new FabricRenderer();
 
         core = new SpawnerSphereCore(platformHelper, renderer, config);
+
+        // Register config screen (optional - only if Cloth Config is available)
+        ConfigScreenFactory.register(new ClothConfigScreen(config));
 
         // Register keybinding
         toggleKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
