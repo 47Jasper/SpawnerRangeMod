@@ -66,4 +66,14 @@ public class ForgePlatformHelper implements IPlatformHelper {
         }
         ((LocalPlayer) player).displayClientMessage(Component.literal(message), actionBar);
     }
+
+    @Override
+    @NotNull
+    public LookVector getPlayerLookVector(Object player) {
+        if (!(player instanceof LocalPlayer)) {
+            return new LookVector(0, 0, 1);
+        }
+        Vec3 lookVec = ((LocalPlayer) player).getViewVector(1.0f);
+        return new LookVector(lookVec.x, lookVec.y, lookVec.z);
+    }
 }

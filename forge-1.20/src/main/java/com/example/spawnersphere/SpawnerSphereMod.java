@@ -1,7 +1,9 @@
 package com.example.spawnersphere;
 
 import com.example.spawnersphere.common.SpawnerSphereCore;
+import com.example.spawnersphere.common.config.ConfigScreenFactory;
 import com.example.spawnersphere.common.config.ModConfig;
+import com.example.spawnersphere.config.ClothConfigScreen;
 import com.example.spawnersphere.platform.ForgePlatformHelper;
 import com.example.spawnersphere.platform.ForgeRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -45,6 +47,9 @@ public class SpawnerSphereMod {
         ForgeRenderer renderer = new ForgeRenderer();
 
         core = new SpawnerSphereCore(platformHelper, renderer, config);
+
+        // Register config screen (optional - only if Cloth Config is available)
+        ConfigScreenFactory.register(new ClothConfigScreen(config));
 
         // Register Forge event listeners
         MinecraftForge.EVENT_BUS.register(new ClientEvents());

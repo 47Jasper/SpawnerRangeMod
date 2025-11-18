@@ -175,9 +175,20 @@ public class SpawnerSphereCore {
 
             // Only render if within extended range
             if (distance < scanRadius + sphereRadius) {
-                // Frustum culling (if enabled and look vector available)
-                // Note: This requires platform-specific look vector support
-                // For now, we skip this optimization if not explicitly supported
+                // Frustum culling (if enabled)
+                if (config.isEnableFrustumCulling()) {
+                    IPlatformHelper.LookVector lookVec = platformHelper.getPlayerLookVector(player);
+                    boolean isVisible = FrustumCuller.isVisible(
+                        spawner.center,
+                        sphereRadius,
+                        playerPos,
+                        lookVec.x, lookVec.y, lookVec.z,
+                        90.0f // Default FOV, could be made configurable
+                    );
+                    if (!isVisible) {
+                        continue; // Skip rendering this sphere
+                    }
+                }
 
                 // Determine if player is within activation range
                 boolean inRange = distance <= sphereRadius;

@@ -68,4 +68,15 @@ public class LegacyFabricPlatformHelper implements IPlatformHelper {
         // Legacy versions don't have action bar, always use chat
         ((ClientPlayerEntity) player).addChatMessage(new LiteralText(message));
     }
+
+    @Override
+    @NotNull
+    public LookVector getPlayerLookVector(Object player) {
+        if (!(player instanceof EntityPlayer)) {
+            return new LookVector(0, 0, 1);
+        }
+        EntityPlayer p = (EntityPlayer) player;
+        Vec3d lookVec = p.getLook(1.0f);
+        return new LookVector(lookVec.xCoord, lookVec.yCoord, lookVec.zCoord);
+    }
 }

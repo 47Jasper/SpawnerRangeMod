@@ -47,6 +47,13 @@ public interface IPlatformHelper {
      */
     void sendMessage(Object player, String message, boolean actionBar);
 
+    /**
+     * Get the player's look direction vector
+     * @return LookVector with normalized x, y, z components
+     */
+    @NotNull
+    LookVector getPlayerLookVector(Object player);
+
     enum Platform {
         FABRIC,
         FORGE,
@@ -72,6 +79,29 @@ public interface IPlatformHelper {
             double dy = this.y - other.y;
             double dz = this.z - other.z;
             return Math.sqrt(dx * dx + dy * dy + dz * dz);
+        }
+    }
+
+    /**
+     * Player look direction vector
+     */
+    class LookVector {
+        public final double x;
+        public final double y;
+        public final double z;
+
+        public LookVector(double x, double y, double z) {
+            // Normalize on construction
+            double length = Math.sqrt(x * x + y * y + z * z);
+            if (length > 0) {
+                this.x = x / length;
+                this.y = y / length;
+                this.z = z / length;
+            } else {
+                this.x = 0;
+                this.y = 0;
+                this.z = 1; // Default forward
+            }
         }
     }
 }

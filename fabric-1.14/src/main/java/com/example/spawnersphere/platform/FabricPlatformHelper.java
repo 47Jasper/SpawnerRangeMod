@@ -66,4 +66,14 @@ public class FabricPlatformHelper implements IPlatformHelper {
         }
         ((ClientPlayerEntity) player).sendMessage(new LiteralText(message), actionBar);
     }
+
+    @Override
+    @NotNull
+    public LookVector getPlayerLookVector(Object player) {
+        if (!(player instanceof ClientPlayerEntity)) {
+            return new LookVector(0, 0, 1);
+        }
+        Vec3d lookVec = ((ClientPlayerEntity) player).getRotationVec(1.0f);
+        return new LookVector(lookVec.x, lookVec.y, lookVec.z);
+    }
 }

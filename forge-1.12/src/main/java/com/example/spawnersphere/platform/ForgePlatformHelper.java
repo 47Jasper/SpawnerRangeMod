@@ -69,4 +69,14 @@ public class ForgePlatformHelper implements IPlatformHelper {
         // MC 1.12 supports action bar
         ((EntityPlayerSP) player).sendStatusMessage(new TextComponentString(message), actionBar);
     }
+
+    @Override
+    @NotNull
+    public LookVector getPlayerLookVector(Object player) {
+        if (!(player instanceof EntityPlayerSP)) {
+            return new LookVector(0, 0, 1);
+        }
+        net.minecraft.util.math.Vec3d lookVec = ((EntityPlayerSP) player).getLook(1.0f);
+        return new LookVector(lookVec.x, lookVec.y, lookVec.z);
+    }
 }

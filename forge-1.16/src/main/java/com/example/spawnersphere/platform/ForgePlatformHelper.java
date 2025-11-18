@@ -65,4 +65,14 @@ public class ForgePlatformHelper implements IPlatformHelper {
         }
         ((ClientPlayerEntity) player).sendStatusMessage(new StringTextComponent(message), actionBar);
     }
+
+    @Override
+    @NotNull
+    public LookVector getPlayerLookVector(Object player) {
+        if (!(player instanceof ClientPlayerEntity)) {
+            return new LookVector(0, 0, 1);
+        }
+        net.minecraft.util.math.vector.Vector3d lookVec = ((ClientPlayerEntity) player).getLookVec();
+        return new LookVector(lookVec.x, lookVec.y, lookVec.z);
+    }
 }
