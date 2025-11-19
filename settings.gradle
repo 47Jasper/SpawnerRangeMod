@@ -1,3 +1,26 @@
+pluginManagement {
+    repositories {
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        maven {
+            name = 'Legacy Fabric'
+            url = 'https://maven.legacyfabric.net/'
+        }
+        maven {
+            name = 'Forge'
+            url = 'https://maven.minecraftforge.net/'
+        }
+        maven {
+            name = 'NeoForge'
+            url = 'https://maven.neoforged.net/releases/'
+        }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
 rootProject.name = 'spawner-sphere-mod'
 
 // Common module
@@ -21,4 +44,3 @@ include 'forge-1.20'     // 1.20 - 1.20.4
 
 // NeoForge modules
 include 'neoforge-1.20'  // 1.20.5+
-

@@ -1,14 +1,5 @@
-plugins {
-    // Fabric
-    id 'fabric-loom' version '1.3-SNAPSHOT' apply false
-    id 'legacy-looming' version '1.3-SNAPSHOT' apply false
-
-    // Forge
-    id 'net.minecraftforge.gradle' version '5.1.+' apply false
-
-    // NeoForge
-    id 'net.neoforged.gradle' version '6.+' apply false
-}
+// Plugins are applied directly in subproject build.gradle files
+// This allows the common module to build/test independently
 
 allprojects {
     apply plugin: 'java'
