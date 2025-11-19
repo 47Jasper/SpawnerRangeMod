@@ -15,6 +15,9 @@
   "entrypoints": {
     "client": [
       "com.example.spawnersphere.SpawnerSphereMod"
+    ],
+    "modmenu": [
+      "com.example.spawnersphere.ModMenuIntegration"
     ]
   },
   "depends": {

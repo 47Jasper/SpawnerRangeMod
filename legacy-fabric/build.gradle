@@ -3,6 +3,9 @@ plugins {
 }
 
 dependencies {
+    // Common module
+    implementation project(':common')
+
     minecraft 'com.mojang:minecraft:1.12.2'
     mappings 'net.legacyfabric:yarn:1.12.2+build.533:v2'
     modImplementation 'net.legacyfabric.legacy-fabric-api:legacy-fabric-api:1.9.3+1.12.2'

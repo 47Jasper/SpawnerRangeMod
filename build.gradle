@@ -1,21 +1,21 @@
-plugins {
-    id 'fabric-loom' version '1.3-SNAPSHOT' apply false
-    id 'legacy-looming' version '1.3-SNAPSHOT' apply false
-}
+// Plugins are applied directly in subproject build.gradle files
+// This allows the common module to build/test independently
 
 allprojects {
     apply plugin: 'java'
-    
+
     group = 'com.example'
     version = '1.0.0'
-    
+
     repositories {
         mavenCentral()
         maven { url 'https://maven.fabricmc.net/' }
         maven { url 'https://maven.legacyfabric.net/' }
+        maven { url 'https://maven.minecraftforge.net/' }
+        maven { url 'https://maven.neoforged.net/releases/' }
         maven { url 'https://jitpack.io' }
     }
-    
+
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
         options.release = 8

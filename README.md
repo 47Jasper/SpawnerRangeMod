@@ -4,119 +4,147 @@ A client-side Minecraft mod that displays a toggleable wireframe sphere around m
 
 ## Features
 
-- **Visual Spawner Range**: Displays a 16-block radius sphere around mob spawners
-- **Toggle On/Off**: Press 'B' key (configurable) to toggle the display
-- **Dynamic Scanning**: Automatically scans for spawners within 64 blocks
-- **Range Indicator**: Sphere changes color when you're within activation range
-  - Green/Yellow: Outside activation range
-  - Yellow/Red: Inside activation range (spawner active)
-- **Performance Optimized**: Only renders spheres for nearby spawners
-- **Client-Side Only**: Works on any server without server-side installation
+- **Visual Range Display**: 16-block radius sphere around mob spawners
+- **Toggle Control**: Press 'B' to enable/disable (configurable keybind)
+- **Auto-Scanning**: Finds spawners within 64 blocks
+- **Color Indicators**: Green (outside range) / Red (inside activation range)
+- **Performance Optimized**: Spatial indexing, LOD, frustum culling
+- **Config GUI**: Full configuration via Mod Menu (Fabric) or Mods screen (Forge/NeoForge)
+- **Client-Side Only**: Works on any server
 
 ## Version Support
 
-This mod supports a wide range of Minecraft versions through different modules:
+**14 modules supporting MC 1.8.9 → 1.21.10**
 
-- **Legacy Fabric** (1.8.9 - 1.13.2): `legacy-fabric/` module
-- **Fabric 1.14 - 1.16.5**: `fabric-1.14/` module  
-- **Fabric 1.17 - 1.18.2**: `fabric-1.17/` module
-- **Fabric 1.19 - 1.19.4**: `fabric-1.19/` module
-- **Fabric 1.20 - 1.20.4**: `fabric-1.20/` module
-- **Fabric 1.21 - 1.21.4**: `fabric-1.21/` module
+### Fabric (8 modules)
+- **legacy-fabric**: MC 1.8.9-1.13.2
+- **fabric-1.14**: MC 1.14-1.16.5
+- **fabric-1.17**: MC 1.17-1.18.2
+- **fabric-1.19**: MC 1.19-1.19.4
+- **fabric-1.20**: MC 1.20-1.20.4
+- **fabric-1.21**: MC 1.21.0-1.21.4
+- **fabric-1.21.5**: MC 1.21.5-1.21.8
+- **fabric-1.21.9**: MC 1.21.9-1.21.10
+
+### Forge (4 modules)
+- **forge-1.12**: MC 1.8.9-1.12.2 (native config GUI)
+- **forge-1.16**: MC 1.13-1.16.5 (TOML config)
+- **forge-1.19**: MC 1.17-1.19.x
+- **forge-1.20**: MC 1.20-1.20.4
+
+### NeoForge (1 module)
+- **neoforge-1.20**: MC 1.20.5+
+
+### Common (1 module)
+- **common**: Platform-agnostic core logic
+
+## Installation
+
+### Fabric
+1. Install [Fabric Loader](https://fabricmc.net/use/) (or [Legacy Fabric](https://legacyfabric.net/) for 1.8.9-1.13.2)
+2. Download Fabric API for your version
+3. Place mod JAR and Fabric API in `.minecraft/mods/`
+
+### Forge/NeoForge
+1. Install [Forge](https://files.minecraftforge.net/) or [NeoForge](https://neoforged.net/)
+2. Place mod JAR in `.minecraft/mods/`
 
 ## Building
 
-### Prerequisites
-
-- Java Development Kit (JDK) 17 or higher
-- Git
-
-### Build Instructions
-
-1. Clone the repository:
+Build specific version:
 ```bash
-git clone https://github.com/example/spawner-sphere-mod.git
-cd spawner-sphere-mod
+./gradlew :fabric-1.21.9:build  # MC 1.21.9-1.21.10
+./gradlew :fabric-1.21.5:build  # MC 1.21.5-1.21.8
+./gradlew :fabric-1.21:build    # MC 1.21.0-1.21.4
+./gradlew :forge-1.20:build     # MC 1.20-1.20.4
 ```
 
-2. Build the specific version you need:
-
-For Minecraft 1.21.x:
-```bash
-./gradlew :fabric-1.21:build
-```
-
-For Minecraft 1.20.x:
-```bash
-./gradlew :fabric-1.20:build
-```
-
-For Legacy versions (1.8.9-1.13.2):
-```bash
-./gradlew :legacy-fabric:build
-```
-
-3. The built JAR file will be in the respective module's `build/libs/` directory.
-
-### Build All Versions
-
-To build all supported versions at once:
+Build all versions:
 ```bash
 ./gradlew build
 ```
 
-## Installation
-
-1. Install the appropriate mod loader for your Minecraft version:
-   - For 1.14+: Install [Fabric Loader](https://fabricmc.net/use/)
-   - For 1.8.9-1.13.2: Install [Legacy Fabric](https://legacyfabric.net/)
-
-2. Install Fabric API:
-   - For 1.14+: Download [Fabric API](https://modrinth.com/mod/fabric-api) for your version
-   - For 1.8.9-1.13.2: Download [Legacy Fabric API](https://github.com/Legacy-Fabric/fabric/releases)
-
-3. Place both the mod JAR and Fabric API JAR in your `.minecraft/mods/` folder
-
-4. Launch Minecraft with the Fabric profile
-
-## Usage
-
-- **Toggle Display**: Press 'B' key (default) to enable/disable the sphere display
-- **Automatic Scanning**: The mod automatically scans for spawners within 64 blocks
-- **Color Indicators**:
-  - Green wireframe: Outside spawner activation range
-  - Yellow/Red wireframe: Inside spawner activation range
+Built JARs are in `<module>/build/libs/`
 
 ## Configuration
 
-The keybind can be changed in Minecraft's Controls settings under the "Spawner Sphere" category.
+### Default Settings
+- **Sphere Radius**: 16 blocks (Minecraft's spawner activation range)
+- **Scan Radius**: 64 blocks
+- **Scan Interval**: 60 seconds (or when moving 16+ blocks)
+- **Colors**: Green (outside), Red (inside)
+- **Performance**: Spatial indexing + LOD enabled
 
-## Technical Details
+### Config GUI Access
 
-- **Activation Range**: Mob spawners activate when a player is within 16 blocks (Euclidean distance)
-- **Scan Range**: The mod scans for spawners within 64 blocks of the player
-- **Rescan Interval**: Automatic rescan every 5 seconds when enabled
-- **Rendering**: Uses wireframe rendering with transparency for minimal visual obstruction
+**Fabric**: Mod Menu → Spawner Sphere → Config
+**Forge/NeoForge**: Mods → Spawner Sphere → Config
+**Forge 1.12**: Native Forge config GUI
+**Forge 1.16**: Edit `config/spawnersphere.toml`
+**Legacy Fabric**: Press 'O' key or edit `config/spawnersphere.json`
 
-## Compatibility
+### Configurable Options
+- Sphere/scan radius (1-256 blocks)
+- Scan interval (1000+ms)
+- Colors (RGBA)
+- Performance features (spatial indexing, LOD, frustum culling)
+- LOD settings (max/min segments, distance)
+- Movement threshold (1-64 blocks)
+- Rendering quality (segments, equator, distance display)
 
-- **Client-Side Only**: Works on any server, including vanilla servers
-- **Multiplayer Compatible**: Each player can toggle their own display independently
-- **Performance**: Minimal impact on FPS due to optimized rendering
+## Architecture
 
-## Known Issues
+Uses common module pattern for multi-loader support:
+- **common/**: Platform-agnostic core logic (SpawnerSphereCore, config, performance)
+- **Platform modules**: Fabric/Forge/NeoForge-specific implementations
+- **Clean abstraction**: IPlatformHelper, IRenderer interfaces
 
-- On some older versions, the sphere may flicker slightly when moving
-- Very large numbers of spawners in one area may impact performance
+Key components:
+- **SpawnerSphereCore**: Main business logic
+- **SpatialIndex**: Chunk-based HashMap for efficient queries
+- **LODCalculator**: Distance-based segment reduction
+- **FrustumCuller**: View-based culling
+- **ModConfig**: All configuration options
+
+See `ARCHITECTURE.md` for detailed technical documentation.
+
+## Testing
+
+**67 comprehensive unit tests** with ~100% coverage of core logic:
+- ModConfigTest (10 tests)
+- SpatialIndexTest (10 tests)
+- LODCalculatorTest (10 tests)
+- FrustumCullerTest (10 tests)
+- SpawnerSphereCoreTest (24 tests)
+- ConfigScreenFactoryTest (7 tests)
+
+Run tests:
+```bash
+./gradlew :common:test
+```
+
+## Performance
+
+- **Spatial Indexing**: Chunk-based HashMap (O(1) queries)
+- **Level of Detail**: 32→16 segments based on distance
+- **Frustum Culling**: Skip rendering off-screen spheres
+- **Lazy Scanning**: Movement/time-based triggers only
 
 ## License
 
-MIT License - See LICENSE file for details
+MIT License - See LICENSE file
 
 ## Contributing
 
-Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+Pull requests welcome! For major changes, open an issue first.
+
+1. Fork repository
+2. Follow architecture in `ARCHITECTURE.md`
+3. Test thoroughly (see `TODO.md` for needed work)
+4. Submit PR with clear description
 
 ## Credits
 
-Created for the Minecraft modding community. Special thanks to the Fabric and Legacy Fabric teams for their mod loader frameworks.
+Created for the Minecraft modding community.
+
+Thanks to Fabric, Legacy Fabric, Forge, and NeoForge teams.

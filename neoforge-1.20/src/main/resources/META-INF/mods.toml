@@ -1,0 +1,29 @@
+modLoader="javafml"
+loaderVersion="[2,)"
+license="MIT"
+issueTrackerURL="https://github.com/example/spawner-sphere-mod/issues"
+
+[[mods]]
+modId="spawnersphere"
+version="${file.jarVersion}"
+displayName="Spawner Sphere"
+description='''
+Displays a toggleable wireframe sphere around mob spawners showing their 16-block activation range.
+'''
+authors="SpawnerSphere Team"
+displayURL="https://github.com/example/spawner-sphere-mod"
+logoFile="logo.png"
+
+[[dependencies.spawnersphere]]
+    modId="neoforge"
+    mandatory=true
+    versionRange="[20.6,)"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.spawnersphere]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.5,)"
+    ordering="NONE"
+    side="CLIENT"

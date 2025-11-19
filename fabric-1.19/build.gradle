@@ -3,6 +3,9 @@ plugins {
 }
 
 dependencies {
+    // Common module
+    implementation project(':common')
+
     minecraft 'com.mojang:minecraft:1.19.4'
     mappings "net.fabricmc:yarn:1.19.4+build.2:v2"
     modImplementation "net.fabricmc:fabric-loader:0.14.21"
