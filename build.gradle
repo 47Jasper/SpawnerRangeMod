@@ -24,6 +24,6 @@ allprojects {
 
 subprojects {
     dependencies {
-        implementation 'org.joml:joml:1.10.5'
+        implementation 'org.joml:joml:1.10.8'
     }
 }
