@@ -20,7 +20,7 @@ pluginManagement {
         mavenCentral()
     }
     plugins {
-        id 'fabric-loom' version '1.11'
+        id 'fabric-loom' version '1.11-SNAPSHOT'
     }
 }
 
