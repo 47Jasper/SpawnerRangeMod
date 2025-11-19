@@ -23,6 +23,8 @@ jobs:
 
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: 8.5
 
     - name: Run Tests
       run: gradle :common:test --no-daemon --stacktrace
@@ -58,6 +60,8 @@ jobs:
 
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: 8.5
 
     - name: Build Mod
       run: gradle :fabric-1.21.9:build --no-daemon --stacktrace
