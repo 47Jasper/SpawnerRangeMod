@@ -21,7 +21,7 @@ pluginManagement {
     }
     plugins {
         // Use Loom 1.11-SNAPSHOT (previously working)
-        id 'fabric-loom' version '1.11-SNAPSHOT'
+        id 'fabric-loom' version '1.14.0-alpha.26'
     }
 }
 
