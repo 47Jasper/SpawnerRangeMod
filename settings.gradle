@@ -20,9 +20,8 @@ pluginManagement {
         mavenCentral()
     }
     plugins {
-        // Use stable Loom 1.11 (officially recommended for MC 1.21.9/1.21.10)
-        // Requires Gradle 8.14, which is stable and reliable
-        id 'fabric-loom' version '1.11'
+        // Use Loom 1.11-SNAPSHOT (previously working)
+        id 'fabric-loom' version '1.11-SNAPSHOT'
     }
 }
 
