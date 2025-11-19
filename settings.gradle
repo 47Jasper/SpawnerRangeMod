@@ -20,7 +20,9 @@ pluginManagement {
         mavenCentral()
     }
     plugins {
-        id 'fabric-loom' version '1.11-SNAPSHOT'
+        // Use stable Loom 1.13 for Gradle 9.0+ support
+        // For MC 1.21.10, Loom is version-independent
+        id 'fabric-loom' version '1.13'
     }
 }
 
