@@ -125,10 +125,18 @@ public class SpawnerSphereCore {
         int playerBlockY = (int) Math.floor(playerPos.y);
         int playerBlockZ = (int) Math.floor(playerPos.z);
 
-        // Scan in a cube around the player
+        // Scan in a sphere around the player (not a cube)
+        // This reduces checks by ~47% compared to cubic scanning
+        int scanRadiusSquared = scanRadius * scanRadius;
         for (int x = -scanRadius; x <= scanRadius; x++) {
             for (int y = -scanRadius; y <= scanRadius; y++) {
                 for (int z = -scanRadius; z <= scanRadius; z++) {
+                    // Spherical boundary check: only scan blocks within the sphere
+                    int distanceSquared = x * x + y * y + z * z;
+                    if (distanceSquared > scanRadiusSquared) {
+                        continue; // Skip blocks outside the sphere
+                    }
+
                     Object blockPos = platformHelper.createBlockPos(
                         playerBlockX + x,
                         playerBlockY + y,

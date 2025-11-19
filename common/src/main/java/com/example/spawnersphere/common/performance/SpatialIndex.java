@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Chunk-based spatial index for efficient spawner lookup
@@ -120,7 +121,7 @@ public class SpatialIndex {
 
         @Override
         public int hashCode() {
-            return 31 * x + z;
+            return Objects.hash(x, z);
         }
     }
 

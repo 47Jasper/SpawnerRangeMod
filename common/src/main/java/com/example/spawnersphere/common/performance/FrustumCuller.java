@@ -48,18 +48,11 @@ public class FrustumCuller {
         double ndy = dy / distance;
         double ndz = dz / distance;
 
-        // Normalize look direction
-        double lookLen = Math.sqrt(lookX * lookX + lookY * lookY + lookZ * lookZ);
-        if (lookLen < 0.001) {
-            return true; // Can't determine, render it
-        }
-
-        double nlx = lookX / lookLen;
-        double nly = lookY / lookLen;
-        double nlz = lookZ / lookLen;
+        // Look direction is already normalized by LookVector constructor
+        // No need to normalize again (saves sqrt calculation)
 
         // Dot product gives us angle
-        double dot = ndx * nlx + ndy * nly + ndz * nlz;
+        double dot = ndx * lookX + ndy * lookY + ndz * lookZ;
 
         // Convert FOV to radians and add sphere size margin
         double fovRadians = Math.toRadians(fov / 2.0);
