@@ -93,4 +93,19 @@ public class LODCalculatorTest {
         segments = LODCalculator.calculateSegments(50.0, 24, 24, 32.0);
         assertEquals(24, segments);
     }
+
+    @Test
+    public void testInvertedMinMax() {
+        // Test defensive behavior when maxSegments < minSegments
+        // Should swap them automatically
+        int segments = LODCalculator.calculateSegments(10.0, 16, 32, 32.0);
+        assertEquals(32, segments); // Close distance should use the higher value
+
+        segments = LODCalculator.calculateSegments(100.0, 16, 32, 32.0);
+        assertEquals(16, segments); // Far distance should use the lower value
+
+        // Middle distance should interpolate between them
+        segments = LODCalculator.calculateSegments(48.0, 16, 32, 32.0);
+        assertTrue(segments >= 16 && segments <= 32);
+    }
 }
