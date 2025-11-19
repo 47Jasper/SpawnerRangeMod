@@ -19,9 +19,15 @@ pluginManagement {
         gradlePluginPortal()
         mavenCentral()
     }
+    plugins {
+        id 'fabric-loom' version '1.7.2'
+    }
 }
 
 rootProject.name = 'spawner-sphere-mod'
 
-// Common module only - testing without platform-specific modules
+// Common module
 include 'common'
+
+// Fabric 1.21.10 module (fabric-1.21.9 targets MC 1.21.10)
+include 'fabric-1.21.9'
