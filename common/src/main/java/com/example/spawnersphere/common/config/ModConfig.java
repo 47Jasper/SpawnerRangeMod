@@ -1,9 +1,15 @@
 package com.example.spawnersphere.common.config;
 
+import java.io.*;
+import java.util.Properties;
+
 /**
  * Configuration for the Spawner Sphere mod
  */
 public class ModConfig {
+
+    private static final String CONFIG_FILE_NAME = "spawner-sphere-mod.properties";
+    private File configFile;
 
     // Sphere rendering
     private int sphereRadius = 16;
@@ -34,6 +40,10 @@ public class ModConfig {
 
     public void setSphereRadius(int sphereRadius) {
         this.sphereRadius = Math.max(1, Math.min(64, sphereRadius));
+        // Ensure sphereRadius <= scanRadius (logical validation)
+        if (this.sphereRadius > this.scanRadius) {
+            this.scanRadius = this.sphereRadius;
+        }
     }
 
     public int getScanRadius() {
@@ -42,6 +52,10 @@ public class ModConfig {
 
     public void setScanRadius(int scanRadius) {
         this.scanRadius = Math.max(16, Math.min(256, scanRadius));
+        // Ensure sphereRadius <= scanRadius (logical validation)
+        if (this.sphereRadius > this.scanRadius) {
+            this.sphereRadius = this.scanRadius;
+        }
     }
 
     public long getScanInterval() {
@@ -114,6 +128,10 @@ public class ModConfig {
 
     public void setLodMaxSegments(int lodMaxSegments) {
         this.lodMaxSegments = Math.max(8, Math.min(64, lodMaxSegments));
+        // Ensure max >= min (cross-validation)
+        if (this.lodMaxSegments < this.lodMinSegments) {
+            this.lodMinSegments = this.lodMaxSegments;
+        }
     }
 
     public int getLodMinSegments() {
@@ -122,6 +140,10 @@ public class ModConfig {
 
     public void setLodMinSegments(int lodMinSegments) {
         this.lodMinSegments = Math.max(4, Math.min(32, lodMinSegments));
+        // Ensure max >= min (cross-validation)
+        if (this.lodMinSegments > this.lodMaxSegments) {
+            this.lodMaxSegments = this.lodMinSegments;
+        }
     }
 
     public double getLodDistance() {
@@ -177,5 +199,110 @@ public class ModConfig {
         public int getGreen() { return green; }
         public int getBlue() { return blue; }
         public int getAlpha() { return alpha; }
+    }
+
+    /**
+     * Set the config file location (should be called during mod initialization)
+     */
+    public void setConfigFile(File configFile) {
+        this.configFile = configFile;
+    }
+
+    /**
+     * Load configuration from file
+     */
+    public void load() {
+        if (configFile == null || !configFile.exists()) {
+            return;
+        }
+
+        try (FileInputStream fis = new FileInputStream(configFile)) {
+            Properties props = new Properties();
+            props.load(fis);
+
+            // Load all config values
+            sphereRadius = Integer.parseInt(props.getProperty("sphereRadius", String.valueOf(sphereRadius)));
+            scanRadius = Integer.parseInt(props.getProperty("scanRadius", String.valueOf(scanRadius)));
+            scanInterval = Long.parseLong(props.getProperty("scanInterval", String.valueOf(scanInterval)));
+
+            sphereSegments = Integer.parseInt(props.getProperty("sphereSegments", String.valueOf(sphereSegments)));
+            renderEquator = Boolean.parseBoolean(props.getProperty("renderEquator", String.valueOf(renderEquator)));
+            showDistanceInActionBar = Boolean.parseBoolean(props.getProperty("showDistanceInActionBar", String.valueOf(showDistanceInActionBar)));
+
+            enableSpatialIndexing = Boolean.parseBoolean(props.getProperty("enableSpatialIndexing", String.valueOf(enableSpatialIndexing)));
+            enableFrustumCulling = Boolean.parseBoolean(props.getProperty("enableFrustumCulling", String.valueOf(enableFrustumCulling)));
+            enableLOD = Boolean.parseBoolean(props.getProperty("enableLOD", String.valueOf(enableLOD)));
+            lodMaxSegments = Integer.parseInt(props.getProperty("lodMaxSegments", String.valueOf(lodMaxSegments)));
+            lodMinSegments = Integer.parseInt(props.getProperty("lodMinSegments", String.valueOf(lodMinSegments)));
+            lodDistance = Double.parseDouble(props.getProperty("lodDistance", String.valueOf(lodDistance)));
+            movementThreshold = Double.parseDouble(props.getProperty("movementThreshold", String.valueOf(movementThreshold)));
+
+            // Load colors
+            outsideRangeColor = new ColorConfig(
+                Integer.parseInt(props.getProperty("outsideRangeColor.red", "128")),
+                Integer.parseInt(props.getProperty("outsideRangeColor.green", "255")),
+                Integer.parseInt(props.getProperty("outsideRangeColor.blue", "0")),
+                Integer.parseInt(props.getProperty("outsideRangeColor.alpha", "51"))
+            );
+            insideRangeColor = new ColorConfig(
+                Integer.parseInt(props.getProperty("insideRangeColor.red", "255")),
+                Integer.parseInt(props.getProperty("insideRangeColor.green", "128")),
+                Integer.parseInt(props.getProperty("insideRangeColor.blue", "0")),
+                Integer.parseInt(props.getProperty("insideRangeColor.alpha", "102"))
+            );
+        } catch (IOException | NumberFormatException e) {
+            // If load fails, keep default values
+            System.err.println("Failed to load config: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Save configuration to file
+     */
+    public void save() {
+        if (configFile == null) {
+            return;
+        }
+
+        // Ensure parent directory exists
+        File parentDir = configFile.getParentFile();
+        if (parentDir != null && !parentDir.exists()) {
+            parentDir.mkdirs();
+        }
+
+        try (FileOutputStream fos = new FileOutputStream(configFile)) {
+            Properties props = new Properties();
+
+            // Save all config values
+            props.setProperty("sphereRadius", String.valueOf(sphereRadius));
+            props.setProperty("scanRadius", String.valueOf(scanRadius));
+            props.setProperty("scanInterval", String.valueOf(scanInterval));
+
+            props.setProperty("sphereSegments", String.valueOf(sphereSegments));
+            props.setProperty("renderEquator", String.valueOf(renderEquator));
+            props.setProperty("showDistanceInActionBar", String.valueOf(showDistanceInActionBar));
+
+            props.setProperty("enableSpatialIndexing", String.valueOf(enableSpatialIndexing));
+            props.setProperty("enableFrustumCulling", String.valueOf(enableFrustumCulling));
+            props.setProperty("enableLOD", String.valueOf(enableLOD));
+            props.setProperty("lodMaxSegments", String.valueOf(lodMaxSegments));
+            props.setProperty("lodMinSegments", String.valueOf(lodMinSegments));
+            props.setProperty("lodDistance", String.valueOf(lodDistance));
+            props.setProperty("movementThreshold", String.valueOf(movementThreshold));
+
+            // Save colors
+            props.setProperty("outsideRangeColor.red", String.valueOf(outsideRangeColor.getRed()));
+            props.setProperty("outsideRangeColor.green", String.valueOf(outsideRangeColor.getGreen()));
+            props.setProperty("outsideRangeColor.blue", String.valueOf(outsideRangeColor.getBlue()));
+            props.setProperty("outsideRangeColor.alpha", String.valueOf(outsideRangeColor.getAlpha()));
+            props.setProperty("insideRangeColor.red", String.valueOf(insideRangeColor.getRed()));
+            props.setProperty("insideRangeColor.green", String.valueOf(insideRangeColor.getGreen()));
+            props.setProperty("insideRangeColor.blue", String.valueOf(insideRangeColor.getBlue()));
+            props.setProperty("insideRangeColor.alpha", String.valueOf(insideRangeColor.getAlpha()));
+
+            props.store(fos, "Spawner Sphere Mod Configuration");
+        } catch (IOException e) {
+            System.err.println("Failed to save config: " + e.getMessage());
+        }
     }
 }

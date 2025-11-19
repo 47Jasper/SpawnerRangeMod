@@ -10,10 +10,11 @@ import com.example.spawnersphere.common.platform.IRenderer;
 import com.example.spawnersphere.common.platform.IRenderer.SphereColor;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * Core mod logic - platform agnostic
@@ -26,7 +27,8 @@ public class SpawnerSphereCore {
     private final ModConfig config;
 
     private boolean enabled = false;
-    private final Set<SpawnerData> spawnerPositions = new HashSet<>();
+    // Use HashMap for O(1) lookup by blockPos (fixes O(n*m) nested loop issue)
+    private final Map<Object, SpawnerData> spawnerPositions = new HashMap<>();
     private final SpatialIndex spatialIndex = new SpatialIndex();
     private long lastScanTime = 0;
     private Position lastScanPosition = null;
@@ -83,6 +85,31 @@ public class SpawnerSphereCore {
         if (timePassed || movedSignificantly || lastScanPosition == null) {
             scanForSpawners(player, world);
         }
+
+        // Periodic cleanup: Remove spawners that no longer exist (optimization - moved from render)
+        // This is less frequent than rendering, improving performance
+        cleanupInvalidSpawners(world);
+    }
+
+    /**
+     * Remove spawners that no longer exist in the world
+     * Called periodically from tick to avoid expensive checks every frame
+     */
+    private void cleanupInvalidSpawners(Object world) {
+        List<Object> toRemove = new ArrayList<>();
+        for (Map.Entry<Object, SpawnerData> entry : spawnerPositions.entrySet()) {
+            if (!platformHelper.isSpawner(world, entry.getKey())) {
+                toRemove.add(entry.getKey());
+            }
+        }
+
+        // Remove invalid spawners from both data structures
+        for (Object blockPos : toRemove) {
+            SpawnerData data = spawnerPositions.remove(blockPos);
+            if (data != null && config.isEnableSpatialIndexing()) {
+                spatialIndex.remove(blockPos, data.center);
+            }
+        }
     }
 
     /**
@@ -111,7 +138,7 @@ public class SpawnerSphereCore {
                     if (platformHelper.isSpawner(world, blockPos)) {
                         Position center = platformHelper.getBlockCenter(blockPos);
                         SpawnerData data = new SpawnerData(blockPos, center);
-                        spawnerPositions.add(data);
+                        spawnerPositions.put(blockPos, data);  // Use put() for HashMap
 
                         // Add to spatial index for efficient queries
                         if (config.isEnableSpatialIndexing()) {
@@ -138,7 +165,7 @@ public class SpawnerSphereCore {
         int scanRadius = config.getScanRadius();
 
         // Determine which spawners to render
-        Set<SpawnerData> spawnersToRender;
+        List<SpawnerData> spawnersToRender;
         if (config.isEnableSpatialIndexing()) {
             // Use spatial index for efficient nearby query
             List<SpatialIndex.SpawnerEntry> nearbyEntries = spatialIndex.getNearby(
@@ -146,35 +173,24 @@ public class SpawnerSphereCore {
                 scanRadius + sphereRadius
             );
 
-            spawnersToRender = new HashSet<>();
+            // Use HashMap.get() for O(1) lookup instead of O(n*m) nested loop
+            spawnersToRender = new ArrayList<>();
             for (SpatialIndex.SpawnerEntry entry : nearbyEntries) {
-                // Find corresponding SpawnerData
-                for (SpawnerData data : spawnerPositions) {
-                    if (data.blockPos.equals(entry.blockPos)) {
-                        spawnersToRender.add(data);
-                        break;
-                    }
+                SpawnerData data = spawnerPositions.get(entry.blockPos);
+                if (data != null) {
+                    spawnersToRender.add(data);
                 }
             }
         } else {
-            spawnersToRender = spawnerPositions;
+            spawnersToRender = new ArrayList<>(spawnerPositions.values());
         }
 
-        // Remove spawners that no longer exist and render the rest
-        Iterator<SpawnerData> iterator = spawnersToRender.iterator();
-        while (iterator.hasNext()) {
-            SpawnerData spawner = iterator.next();
+        // Track nearest spawner for action bar message (to avoid spam with multiple spawners)
+        double nearestDistance = Double.MAX_VALUE;
+        SpawnerData nearestSpawner = null;
 
-            // Verify spawner still exists
-            if (!platformHelper.isSpawner(world, spawner.blockPos)) {
-                spawnerPositions.remove(spawner);
-                // Fix: also remove from spatial index to prevent stale entries
-                if (config.isEnableSpatialIndexing()) {
-                    spatialIndex.remove(spawner.blockPos, spawner.center);
-                }
-                continue;
-            }
-
+        // Render all tracked spawners (validation moved to tick phase for performance)
+        for (SpawnerData spawner : spawnersToRender) {
             // Calculate distance from player to spawner center
             double distance = playerPos.distanceTo(spawner.center);
 
@@ -237,12 +253,18 @@ public class SpawnerSphereCore {
                     segments
                 );
 
-                // Optionally show distance in action bar
-                if (config.isShowDistanceInActionBar() && inRange) {
-                    String distanceText = String.format("§eSpawner: %.1f blocks", distance);
-                    platformHelper.sendMessage(player, distanceText, true);
+                // Track nearest spawner in range for action bar message
+                if (config.isShowDistanceInActionBar() && inRange && distance < nearestDistance) {
+                    nearestDistance = distance;
+                    nearestSpawner = spawner;
                 }
             }
+        }
+
+        // Show distance to nearest spawner (avoids spam with multiple spawners)
+        if (config.isShowDistanceInActionBar() && nearestSpawner != null) {
+            String distanceText = String.format("§eSpawner: %.1f blocks", nearestDistance);
+            platformHelper.sendMessage(player, distanceText, true);
         }
     }
 

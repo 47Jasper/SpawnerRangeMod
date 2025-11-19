@@ -8,12 +8,15 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Fabric renderer implementation for MC 1.21+
  */
 public class FabricRenderer implements IRenderer {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger("SpawnerSphere");
     private static final int DEFAULT_SEGMENTS = 24;
 
     @Override
@@ -27,12 +30,20 @@ public class FabricRenderer implements IRenderer {
         int segments
     ) {
         if (!(context instanceof RenderContext)) {
+            LOGGER.warn("renderSphere called with invalid context type: {}",
+                context != null ? context.getClass().getName() : "null");
             return;
         }
 
         RenderContext ctx = (RenderContext) context;
         MatrixStack matrices = ctx.matrices;
         VertexConsumerProvider vertexConsumers = ctx.vertexConsumers;
+
+        // Null safety: Check that vertex consumers is not null
+        if (vertexConsumers == null) {
+            LOGGER.warn("renderSphere called with null vertex consumers");
+            return;
+        }
 
         VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
         Matrix4f matrix = matrices.peek().getPositionMatrix();

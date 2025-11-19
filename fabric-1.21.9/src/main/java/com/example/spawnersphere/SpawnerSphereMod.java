@@ -16,7 +16,10 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3d;
+import net.fabricmc.loader.api.FabricLoader;
 import org.lwjgl.glfw.GLFW;
+
+import java.io.File;
 
 /**
  * Fabric 1.21+ implementation using common architecture
@@ -30,6 +33,13 @@ public class SpawnerSphereMod implements ClientModInitializer {
     public void onInitializeClient() {
         // Initialize the common core with platform-specific implementations
         ModConfig config = new ModConfig();
+
+        // Set up config file location and load
+        File configDir = FabricLoader.getInstance().getConfigDir().toFile();
+        File configFile = new File(configDir, "spawner-sphere-mod.properties");
+        config.setConfigFile(configFile);
+        config.load();
+
         FabricPlatformHelper platformHelper = new FabricPlatformHelper();
         FabricRenderer renderer = new FabricRenderer();
 
@@ -73,6 +83,9 @@ public class SpawnerSphereMod implements ClientModInitializer {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null || client.world == null) return;
 
+        // Null safety: Check consumers before rendering
+        if (context.consumers() == null) return;
+
         // Prepare rendering context
         MatrixStack matrices = context.matrixStack();
         Vec3d cameraPos = context.camera().getPos();
@@ -88,10 +101,8 @@ public class SpawnerSphereMod implements ClientModInitializer {
 
         matrices.pop();
 
-        // Force draw if needed
-        if (context.consumers() != null) {
-            context.consumers().draw();
-        }
+        // Force draw
+        context.consumers().draw();
     }
 
     /**

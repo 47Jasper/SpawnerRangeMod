@@ -27,7 +27,8 @@ public class ClothConfigScreen implements IConfigScreen {
             .setTitle(Text.literal("Spawner Sphere Configuration"))
             .setSavingRunnable(() -> {
                 // Config changes are applied immediately via setters
-                // Future: Save to file here
+                // Save config to file
+                config.save();
             });
 
         ConfigEntryBuilder entryBuilder = builder.entryBuilder();
