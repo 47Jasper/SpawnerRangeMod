@@ -14,7 +14,7 @@ public class FrustumCullerTest {
     public void testSphereDirectlyAhead() {
         // Sphere directly in front of player
         IPlatformHelper.Position sphereCenter = new IPlatformHelper.Position(0, 64, 10);
-        double sphereRadius = 5.0;
+        float sphereRadius = 5.0f;
         IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
 
         // Looking straight ahead (positive Z)
@@ -31,7 +31,7 @@ public class FrustumCullerTest {
     public void testSphereBehind() {
         // Sphere behind player
         IPlatformHelper.Position sphereCenter = new IPlatformHelper.Position(0, 64, -10);
-        double sphereRadius = 5.0;
+        float sphereRadius = 5.0f;
         IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
 
         // Looking straight ahead (positive Z)
@@ -48,7 +48,7 @@ public class FrustumCullerTest {
     public void testSphereToSide() {
         // Sphere to the side (beyond FOV)
         IPlatformHelper.Position sphereCenter = new IPlatformHelper.Position(50, 64, 0);
-        double sphereRadius = 5.0;
+        float sphereRadius = 5.0f;
         IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
 
         // Looking straight ahead (positive Z)
@@ -65,7 +65,7 @@ public class FrustumCullerTest {
     public void testSphereAtEdgeOfFOV() {
         // Sphere at approximately 45 degrees (within 90 degree FOV)
         IPlatformHelper.Position sphereCenter = new IPlatformHelper.Position(10, 64, 10);
-        double sphereRadius = 5.0;
+        float sphereRadius = 5.0f;
         IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
 
         // Looking straight ahead (positive Z)
@@ -82,7 +82,7 @@ public class FrustumCullerTest {
     public void testLargeSphereRadius() {
         // Large sphere that extends into view even if center is not
         IPlatformHelper.Position sphereCenter = new IPlatformHelper.Position(20, 64, 0);
-        double sphereRadius = 25.0; // Large radius
+        float sphereRadius = 25.0f; // Large radius
         IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
 
         // Looking straight ahead (positive Z)
@@ -100,7 +100,7 @@ public class FrustumCullerTest {
     public void testNarrowFOV() {
         // Test with narrow FOV (30 degrees)
         IPlatformHelper.Position sphereCenter = new IPlatformHelper.Position(10, 64, 10);
-        double sphereRadius = 2.0;
+        float sphereRadius = 2.0f;
         IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
 
         // Looking straight ahead with narrow FOV
@@ -118,7 +118,7 @@ public class FrustumCullerTest {
     public void testWideFOV() {
         // Test with wide FOV (120 degrees)
         IPlatformHelper.Position sphereCenter = new IPlatformHelper.Position(15, 64, 10);
-        double sphereRadius = 2.0;
+        float sphereRadius = 2.0f;
         IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
 
         // Looking straight ahead with wide FOV
@@ -134,7 +134,7 @@ public class FrustumCullerTest {
     @Test
     public void testDifferentLookDirections() {
         IPlatformHelper.Position sphereCenter = new IPlatformHelper.Position(10, 64, 0);
-        double sphereRadius = 5.0;
+        float sphereRadius = 5.0f;
         IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
 
         // Looking towards +X
@@ -157,18 +157,18 @@ public class FrustumCullerTest {
     @Test
     public void testYAxisIgnored() {
         // Spheres at different Y levels but same X,Z position
-        IPlatformHelper.Position camera = new IPlatformHelper.Position(0, 64, 0);
+        IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
 
         boolean visible1 = FrustumCuller.isVisible(
             new IPlatformHelper.Position(0, 32, 10), // Low Y
-            5.0, camera,
+            5.0f, cameraPos,
             0.0, 0.0, 1.0,
             90.0f
         );
 
         boolean visible2 = FrustumCuller.isVisible(
             new IPlatformHelper.Position(0, 128, 10), // High Y
-            5.0, camera,
+            5.0f, cameraPos,
             0.0, 0.0, 1.0,
             90.0f
         );
