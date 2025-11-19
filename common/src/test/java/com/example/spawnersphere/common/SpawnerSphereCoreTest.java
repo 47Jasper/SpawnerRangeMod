@@ -211,20 +211,17 @@ public class SpawnerSphereCoreTest {
 
         core.toggle(player, world);
 
-        // First tick should scan
-        core.tick(player, world);
-
-        // Add new spawner after scan
+        // Add new spawner after initial scan from toggle
         world.addSpawner(10, 64, 10);
 
-        // Immediate tick should not rescan (too soon)
+        // Immediate tick should not rescan (too soon after toggle)
         core.tick(player, world);
 
-        // Wait for scan interval
-        Thread.sleep(150);
+        // Wait well beyond scan interval to ensure rescan triggers reliably in CI
+        Thread.sleep(500);
         core.tick(player, world);
 
-        // Should have rescanned and found new spawner
+        // Should have rescanned and found both spawners
         core.render(new Object(), player, world);
         assertEquals(2, renderer.renderedSpheres.size());
     }

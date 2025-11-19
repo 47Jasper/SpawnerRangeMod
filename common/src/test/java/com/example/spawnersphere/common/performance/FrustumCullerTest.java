@@ -159,26 +159,28 @@ public class FrustumCullerTest {
         // Test that Y coordinate is considered in 3D frustum culling
         IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
 
-        // Sphere directly ahead at same Y level
+        // Sphere directly ahead at same Y level - should be visible
         boolean visibleSameY = FrustumCuller.isVisible(
             new IPlatformHelper.Position(0, 64, 10),
             5.0f, cameraPos,
-            0.0, 0.0, 1.0, // Looking straight ahead (no vertical angle)
+            0.0, 0.0, 1.0, // Looking straight ahead in +Z
             90.0f
         );
 
-        // Sphere ahead but far above (large Y difference)
+        // Sphere far above, slightly ahead - should NOT be visible
+        // Direction to sphere (0, 200, 10) from (0, 64, 0) is mostly upward (Y=136)
+        // Looking straight ahead (0, 0, 1) means upward spheres are outside FOV
         boolean visibleHighY = FrustumCuller.isVisible(
             new IPlatformHelper.Position(0, 200, 10),
             5.0f, cameraPos,
-            0.0, 0.0, 1.0, // Looking straight ahead (no vertical angle)
+            0.0, 0.0, 1.0, // Looking straight ahead (no upward angle)
             90.0f
         );
 
         // Sphere at same Y should be visible
         assertTrue(visibleSameY);
-        // Both are visible because the sphere at high Y is still within the frustum
-        // (the frustum considers 3D angles, and the large Y offset doesn't push it outside FOV)
-        assertTrue(visibleHighY);
+        // Sphere far above should NOT be visible when looking straight ahead
+        // This proves Y coordinate is considered in frustum culling
+        assertFalse(visibleHighY);
     }
 }
