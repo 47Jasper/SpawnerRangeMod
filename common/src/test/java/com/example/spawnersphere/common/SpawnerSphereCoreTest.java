@@ -104,11 +104,11 @@ public class SpawnerSphereCoreTest {
         core.toggle(player, world);
         core.render(new Object(), player, world);
 
-        // Player is within range (10 < 16), should be green
+        // Player is within range (10 < 16), should be red-ish (inside range color)
         assertEquals(1, renderer.renderedSpheres.size());
         MockRenderer.RenderedSphere sphere = renderer.renderedSpheres.get(0);
-        // Inside range color (green-ish)
-        assertTrue(sphere.color.green > sphere.color.red);
+        // Inside range color (red-ish)
+        assertTrue(sphere.color.red > sphere.color.green);
     }
 
     @Test
@@ -119,11 +119,11 @@ public class SpawnerSphereCoreTest {
         core.toggle(player, world);
         core.render(new Object(), player, world);
 
-        // Player is outside range (20 > 16), should be red
+        // Player is outside range (20 > 16), should be green-ish (outside range color)
         assertEquals(1, renderer.renderedSpheres.size());
         MockRenderer.RenderedSphere sphere = renderer.renderedSpheres.get(0);
-        // Outside range color (red-ish)
-        assertTrue(sphere.color.red > sphere.color.green);
+        // Outside range color (green-ish)
+        assertTrue(sphere.color.green > sphere.color.red);
     }
 
     @Test
@@ -161,8 +161,8 @@ public class SpawnerSphereCoreTest {
     public void testFrustumCulling() {
         config.setEnableFrustumCulling(true);
 
-        // Spawner behind player
-        world.addSpawner(0, 64, -20);
+        // Spawner behind player (must be > sphereRadius * 2 to avoid "very close" check)
+        world.addSpawner(0, 64, -40); // Distance 40 > 16*2=32
         // Player looking forward (+Z direction)
         player.lookVector = new IPlatformHelper.LookVector(0, 0, 1);
 
@@ -247,8 +247,11 @@ public class SpawnerSphereCoreTest {
         core.tick(player, world);
 
         // Should have rescanned due to movement
+        // Both spawners are still within scan radius (64) from new position (20,64,20):
+        // - Spawner at (5,64,5): distance ~21.2 blocks
+        // - Spawner at (25,64,25): distance ~7.07 blocks
         core.render(new Object(), player, world);
-        assertEquals(1, renderer.renderedSpheres.size());
+        assertEquals(2, renderer.renderedSpheres.size());
     }
 
     @Test

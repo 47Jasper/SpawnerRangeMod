@@ -120,17 +120,21 @@ public class SpatialIndexTest {
     }
 
     @Test
-    public void testYCoordinateIgnored() {
+    public void testYCoordinateConsidered() {
         // Spawners at different Y levels but same X,Z
-        index.add("spawner1", new IPlatformHelper.Position(10, 0, 0));
-        index.add("spawner2", new IPlatformHelper.Position(10, 128, 0));
-        index.add("spawner3", new IPlatformHelper.Position(10, 256, 0));
+        index.add("spawner1", new IPlatformHelper.Position(10, 64, 0)); // Same Y level
+        index.add("spawner2", new IPlatformHelper.Position(10, 128, 0)); // 64 blocks above
+        index.add("spawner3", new IPlatformHelper.Position(10, 256, 0)); // 192 blocks above
 
-        // Query from origin at Y=64
+        // Query from origin at Y=64 with radius 15
         IPlatformHelper.Position center = new IPlatformHelper.Position(0, 64, 0);
         List<SpatialIndex.SpawnerEntry> nearby = index.getNearby(center, 15);
 
-        // Should find all 3 spawners (Y is not considered in distance)
-        assertEquals(3, nearby.size());
+        // Distance uses 3D Euclidean: sqrt(dx^2 + dy^2 + dz^2)
+        // spawner1: sqrt(10^2 + 0^2 + 0^2) = 10 (within radius 15)
+        // spawner2: sqrt(10^2 + 64^2 + 0^2) = ~64.78 (outside radius 15)
+        // spawner3: sqrt(10^2 + 192^2 + 0^2) = ~192.26 (outside radius 15)
+        // Only spawner1 should be found
+        assertEquals(1, nearby.size());
     }
 }

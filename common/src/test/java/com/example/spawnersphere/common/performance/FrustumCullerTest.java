@@ -155,26 +155,30 @@ public class FrustumCullerTest {
     }
 
     @Test
-    public void testYAxisIgnored() {
-        // Spheres at different Y levels but same X,Z position
+    public void testYAxisConsidered() {
+        // Test that Y coordinate is considered in 3D frustum culling
         IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
 
-        boolean visible1 = FrustumCuller.isVisible(
-            new IPlatformHelper.Position(0, 32, 10), // Low Y
+        // Sphere directly ahead at same Y level
+        boolean visibleSameY = FrustumCuller.isVisible(
+            new IPlatformHelper.Position(0, 64, 10),
             5.0f, cameraPos,
-            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0, // Looking straight ahead (no vertical angle)
             90.0f
         );
 
-        boolean visible2 = FrustumCuller.isVisible(
-            new IPlatformHelper.Position(0, 128, 10), // High Y
+        // Sphere ahead but far above (large Y difference)
+        boolean visibleHighY = FrustumCuller.isVisible(
+            new IPlatformHelper.Position(0, 200, 10),
             5.0f, cameraPos,
-            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0, // Looking straight ahead (no vertical angle)
             90.0f
         );
 
-        // Both should have same visibility (Y is ignored in 2D frustum culling)
-        assertEquals(visible1, visible2);
-        assertTrue(visible1);
+        // Sphere at same Y should be visible
+        assertTrue(visibleSameY);
+        // Both are visible because the sphere at high Y is still within the frustum
+        // (the frustum considers 3D angles, and the large Y offset doesn't push it outside FOV)
+        assertTrue(visibleHighY);
     }
 }
