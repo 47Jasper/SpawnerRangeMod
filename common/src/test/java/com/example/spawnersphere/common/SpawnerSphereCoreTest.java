@@ -206,7 +206,7 @@ public class SpawnerSphereCoreTest {
 
     @Test
     public void testPeriodicTick() throws InterruptedException {
-        config.setScanInterval(50); // 50ms scan interval for faster test
+        config.setScanInterval(100); // 100ms scan interval
         world.addSpawner(5, 64, 5);
 
         core.toggle(player, world);
@@ -214,8 +214,14 @@ public class SpawnerSphereCoreTest {
         // Add new spawner after initial scan from toggle
         world.addSpawner(10, 64, 10);
 
-        // Wait for scan interval to pass (use 10x the interval to be absolutely sure)
-        Thread.sleep(500);
+        // Verify immediate tick doesn't rescan (too soon)
+        core.tick(player, world);
+        core.render(new Object(), player, world);
+        assertEquals(1, renderer.renderedSpheres.size());
+
+        // Wait for scan interval and tick again
+        Thread.sleep(150);
+        renderer.renderedSpheres.clear();
         core.tick(player, world);
 
         // Should have rescanned and found both spawners
