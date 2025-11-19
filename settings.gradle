@@ -23,8 +23,5 @@ pluginManagement {
 
 rootProject.name = 'spawner-sphere-mod'
 
-// Common module
+// Common module only - testing without platform-specific modules
 include 'common'
-
-// Fabric 1.21.10 module
-include 'fabric-1.21.9'   // 1.21.9 - 1.21.10
