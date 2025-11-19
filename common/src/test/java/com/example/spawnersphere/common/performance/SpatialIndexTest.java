@@ -137,4 +137,85 @@ public class SpatialIndexTest {
         // Only spawner1 should be found
         assertEquals(1, nearby.size());
     }
+
+    @Test
+    public void testRemoveSingleSpawner() {
+        // Add and then remove a spawner
+        IPlatformHelper.Position pos = new IPlatformHelper.Position(10, 64, 0);
+        Object spawner = new Object();
+        index.add(spawner, pos);
+
+        // Verify it's there
+        List<SpatialIndex.SpawnerEntry> nearby = index.getNearby(pos, 5);
+        assertEquals(1, nearby.size());
+
+        // Remove it
+        index.remove(spawner, pos);
+
+        // Verify it's gone
+        nearby = index.getNearby(pos, 5);
+        assertEquals(0, nearby.size());
+    }
+
+    @Test
+    public void testRemoveOneOfMultiple() {
+        // Add multiple spawners
+        IPlatformHelper.Position pos1 = new IPlatformHelper.Position(0, 64, 0);
+        IPlatformHelper.Position pos2 = new IPlatformHelper.Position(5, 64, 0);
+        Object spawner1 = new Object();
+        Object spawner2 = new Object();
+
+        index.add(spawner1, pos1);
+        index.add(spawner2, pos2);
+
+        // Verify both are there
+        IPlatformHelper.Position center = new IPlatformHelper.Position(0, 64, 0);
+        List<SpatialIndex.SpawnerEntry> nearby = index.getNearby(center, 10);
+        assertEquals(2, nearby.size());
+
+        // Remove one
+        index.remove(spawner1, pos1);
+
+        // Verify only one remains
+        nearby = index.getNearby(center, 10);
+        assertEquals(1, nearby.size());
+        assertEquals(spawner2, nearby.get(0).blockPos);
+    }
+
+    @Test
+    public void testRemoveNonExistent() {
+        // Try to remove from empty index - should not crash
+        IPlatformHelper.Position pos = new IPlatformHelper.Position(0, 64, 0);
+        Object spawner = new Object();
+        index.remove(spawner, pos); // Should not throw
+
+        // Add one spawner and try to remove a different one
+        Object spawner2 = new Object();
+        index.add(spawner2, pos);
+        index.remove(spawner, pos); // Should not remove spawner2
+
+        // Verify spawner2 is still there
+        List<SpatialIndex.SpawnerEntry> nearby = index.getNearby(pos, 5);
+        assertEquals(1, nearby.size());
+    }
+
+    @Test
+    public void testRemoveFromDifferentChunk() {
+        // Add spawner in one chunk
+        IPlatformHelper.Position pos1 = new IPlatformHelper.Position(0, 64, 0);  // Chunk (0,0)
+        IPlatformHelper.Position pos2 = new IPlatformHelper.Position(20, 64, 20); // Chunk (1,1)
+        Object spawner1 = new Object();
+        Object spawner2 = new Object();
+
+        index.add(spawner1, pos1);
+        index.add(spawner2, pos2);
+
+        // Remove from one chunk
+        index.remove(spawner1, pos1);
+
+        // Verify spawner2 in different chunk is unaffected
+        List<SpatialIndex.SpawnerEntry> nearby = index.getNearby(pos2, 5);
+        assertEquals(1, nearby.size());
+        assertEquals(spawner2, nearby.get(0).blockPos);
+    }
 }

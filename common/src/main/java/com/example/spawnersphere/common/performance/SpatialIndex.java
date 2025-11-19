@@ -67,6 +67,21 @@ public class SpatialIndex {
     }
 
     /**
+     * Remove a spawner from the spatial index
+     */
+    public void remove(Object blockPos, Position center) {
+        ChunkCoord chunkCoord = getChunkCoord(center);
+        List<SpawnerEntry> spawners = chunkMap.get(chunkCoord);
+        if (spawners != null) {
+            spawners.removeIf(entry -> entry.blockPos.equals(blockPos));
+            // Clean up empty chunk lists to prevent memory waste
+            if (spawners.isEmpty()) {
+                chunkMap.remove(chunkCoord);
+            }
+        }
+    }
+
+    /**
      * Clear all entries
      */
     public void clear() {

@@ -60,6 +60,29 @@ public class SpawnerSphereCoreTest {
     }
 
     @Test
+    public void testToggleOffClearsSpatialIndex() {
+        // Enable spatial indexing
+        config.setEnableSpatialIndexing(true);
+        world.addSpawner(5, 64, 5);
+
+        // Toggle on and verify spawner is found
+        core.toggle(player, world);
+        renderer.renderedSpheres.clear();
+        core.render(new Object(), player, world);
+        assertEquals(1, renderer.renderedSpheres.size());
+
+        // Toggle off
+        core.toggle(player, world);
+
+        // Toggle back on - should rescan and find spawner again
+        // If spatial index wasn't cleared, stale data could cause issues
+        core.toggle(player, world);
+        renderer.renderedSpheres.clear();
+        core.render(new Object(), player, world);
+        assertEquals(1, renderer.renderedSpheres.size());
+    }
+
+    @Test
     public void testScanForSpawners() {
         // Add spawners to world
         world.addSpawner(5, 64, 5);
