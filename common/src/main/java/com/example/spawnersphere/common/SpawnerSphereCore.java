@@ -51,6 +51,7 @@ public class SpawnerSphereCore {
             platformHelper.sendMessage(player, "§aSpawner spheres enabled", true);
         } else {
             spawnerPositions.clear();
+            spatialIndex.clear(); // Fix: clear spatial index to prevent memory leak
             platformHelper.sendMessage(player, "§cSpawner spheres disabled", true);
         }
     }
@@ -167,6 +168,10 @@ public class SpawnerSphereCore {
             // Verify spawner still exists
             if (!platformHelper.isSpawner(world, spawner.blockPos)) {
                 spawnerPositions.remove(spawner);
+                // Fix: also remove from spatial index to prevent stale entries
+                if (config.isEnableSpatialIndexing()) {
+                    spatialIndex.remove(spawner.blockPos, spawner.center);
+                }
                 continue;
             }
 

@@ -1,5 +1,5 @@
 plugins {
-    id 'net.neoforged.gradle'
+    id 'net.neoforged.gradle' version '7.0.+'
 }
 
 minecraft {

@@ -21,6 +21,13 @@ public class LODCalculator {
         int minSegments,
         double lodDistance
     ) {
+        // Defensive: ensure maxSegments >= minSegments
+        if (maxSegments < minSegments) {
+            int temp = maxSegments;
+            maxSegments = minSegments;
+            minSegments = temp;
+        }
+
         if (distance <= lodDistance) {
             // Full detail for close spheres
             return maxSegments;
