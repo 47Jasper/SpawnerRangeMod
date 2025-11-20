@@ -21,6 +21,11 @@ public class LODCalculator {
         int minSegments,
         double lodDistance
     ) {
+        // Defensive: validate distance is non-negative
+        if (distance < 0) {
+            distance = 0;
+        }
+
         // Defensive: ensure maxSegments >= minSegments
         if (maxSegments < minSegments) {
             int temp = maxSegments;

@@ -194,7 +194,7 @@ public class SpatialIndex {
 
         @Override
         public int hashCode() {
-            return 31 * x + z;
+            return Objects.hash(x, z);
         }
     }
 

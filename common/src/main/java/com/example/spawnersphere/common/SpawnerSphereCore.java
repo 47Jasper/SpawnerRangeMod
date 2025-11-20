@@ -130,45 +130,41 @@ public class SpawnerSphereCore {
      * Thread-safe with synchronized access to shared data structures
      */
     public void scanForSpawners(Object player, Object world) {
-        synchronized (scanLock) {
-            try {
-                spawnerPositions.clear();
-                spatialIndex.clear();
-                Position playerPos = platformHelper.getPlayerPosition(player);
+        spawnerPositions.clear();
+        spatialIndex.clear();
+        Position playerPos = platformHelper.getPlayerPosition(player);
 
-                int scanRadius = config.getScanRadius();
-                int playerBlockX = (int) Math.floor(playerPos.x);
-                int playerBlockY = (int) Math.floor(playerPos.y);
-                int playerBlockZ = (int) Math.floor(playerPos.z);
+        int scanRadius = config.getScanRadius();
+        int playerBlockX = (int) Math.floor(playerPos.x);
+        int playerBlockY = (int) Math.floor(playerPos.y);
+        int playerBlockZ = (int) Math.floor(playerPos.z);
 
-                // Scan in a cube around the player
-                for (int x = -scanRadius; x <= scanRadius; x++) {
-                    for (int y = -scanRadius; y <= scanRadius; y++) {
-                        for (int z = -scanRadius; z <= scanRadius; z++) {
-                            try {
-                                Object blockPos = platformHelper.createBlockPos(
-                                    playerBlockX + x,
-                                    playerBlockY + y,
-                                    playerBlockZ + z
-                                );
+        // Scan in a sphere around the player (not a cube)
+        // This reduces checks by ~47% compared to cubic scanning
+        int scanRadiusSquared = scanRadius * scanRadius;
+        for (int x = -scanRadius; x <= scanRadius; x++) {
+            for (int y = -scanRadius; y <= scanRadius; y++) {
+                for (int z = -scanRadius; z <= scanRadius; z++) {
+                    // Spherical boundary check: only scan blocks within the sphere
+                    int distanceSquared = x * x + y * y + z * z;
+                    if (distanceSquared > scanRadiusSquared) {
+                        continue; // Skip blocks outside the sphere
+                    }
 
-                                if (platformHelper.isSpawner(world, blockPos)) {
-                                    Position center = platformHelper.getBlockCenter(blockPos);
-                                    SpawnerData data = new SpawnerData(blockPos, center);
-                                    spawnerPositions.put(blockPos, data);
+                    Object blockPos = platformHelper.createBlockPos(
+                        playerBlockX + x,
+                        playerBlockY + y,
+                        playerBlockZ + z
+                    );
 
-                                    // Add to spatial index for efficient queries
-                                    if (config.isEnableSpatialIndexing()) {
-                                        spatialIndex.add(data);
-                                    }
-                                }
-                            } catch (Exception e) {
-                                // Log and continue scanning even if one block fails
-                                System.err.println("Error scanning block at (" +
-                                    (playerBlockX + x) + ", " +
-                                    (playerBlockY + y) + ", " +
-                                    (playerBlockZ + z) + "): " + e.getMessage());
-                            }
+                    if (platformHelper.isSpawner(world, blockPos)) {
+                        Position center = platformHelper.getBlockCenter(blockPos);
+                        SpawnerData data = new SpawnerData(blockPos, center);
+                        spawnerPositions.put(blockPos, data);  // Use put() for HashMap
+
+                        // Add to spatial index for efficient queries
+                        if (config.isEnableSpatialIndexing()) {
+                            spatialIndex.add(blockPos, center);
                         }
                     }
                 }
