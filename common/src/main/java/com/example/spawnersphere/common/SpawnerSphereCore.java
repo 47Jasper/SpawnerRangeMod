@@ -142,39 +142,40 @@ public class SpawnerSphereCore {
         // Scan in a sphere around the player (not a cube)
         // This reduces checks by ~47% compared to cubic scanning
         int scanRadiusSquared = scanRadius * scanRadius;
-        for (int x = -scanRadius; x <= scanRadius; x++) {
-            for (int y = -scanRadius; y <= scanRadius; y++) {
-                for (int z = -scanRadius; z <= scanRadius; z++) {
-                    // Spherical boundary check: only scan blocks within the sphere
-                    int distanceSquared = x * x + y * y + z * z;
-                    if (distanceSquared > scanRadiusSquared) {
-                        continue; // Skip blocks outside the sphere
-                    }
+        try {
+            for (int x = -scanRadius; x <= scanRadius; x++) {
+                for (int y = -scanRadius; y <= scanRadius; y++) {
+                    for (int z = -scanRadius; z <= scanRadius; z++) {
+                        // Spherical boundary check: only scan blocks within the sphere
+                        int distanceSquared = x * x + y * y + z * z;
+                        if (distanceSquared > scanRadiusSquared) {
+                            continue; // Skip blocks outside the sphere
+                        }
 
-                    Object blockPos = platformHelper.createBlockPos(
-                        playerBlockX + x,
-                        playerBlockY + y,
-                        playerBlockZ + z
-                    );
+                        Object blockPos = platformHelper.createBlockPos(
+                            playerBlockX + x,
+                            playerBlockY + y,
+                            playerBlockZ + z
+                        );
 
-                    if (platformHelper.isSpawner(world, blockPos)) {
-                        Position center = platformHelper.getBlockCenter(blockPos);
-                        SpawnerData data = new SpawnerData(blockPos, center);
-                        spawnerPositions.put(blockPos, data);  // Use put() for HashMap
+                        if (platformHelper.isSpawner(world, blockPos)) {
+                            Position center = platformHelper.getBlockCenter(blockPos);
+                            SpawnerData data = new SpawnerData(blockPos, center);
+                            spawnerPositions.put(blockPos, data);  // Use put() for HashMap
 
-                        // Add to spatial index for efficient queries
-                        if (config.isEnableSpatialIndexing()) {
-                            spatialIndex.add(blockPos, center);
+                            // Add to spatial index for efficient queries
+                            if (config.isEnableSpatialIndexing()) {
+                                spatialIndex.add(blockPos, center);
+                            }
                         }
                     }
                 }
-
-                lastScanTime = System.currentTimeMillis();
-                lastScanPosition = playerPos;
-            } catch (Exception e) {
-                System.err.println("Critical error during spawner scan: " + e.getMessage());
-                e.printStackTrace();
             }
+            lastScanTime = System.currentTimeMillis();
+            lastScanPosition = playerPos;
+        } catch (Exception e) {
+            System.err.println("Critical error during spawner scan: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
