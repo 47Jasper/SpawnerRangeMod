@@ -23,7 +23,7 @@
   "depends": {
     "fabricloader": ">=0.17.0",
     "fabric-api": "*",
-    "minecraft": ">=1.21.9 <=1.21.10"
+    "minecraft": "1.21.8"
   },
   "suggests": {
     "modmenu": ">=13.0.0"
