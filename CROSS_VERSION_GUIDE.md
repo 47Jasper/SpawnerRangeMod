@@ -7,13 +7,22 @@ This mod uses a **multi-module Gradle architecture** to support multiple Minecra
 ```
 SpawnerRangeMod/
 ├── common/                    # Platform-agnostic core logic (shared by all)
-├── fabric-1.14/              # Targets MC 1.14.x
-├── fabric-1.17/              # Targets MC 1.17.x
-├── fabric-1.19/              # Targets MC 1.19.x (1.19.4)
-├── fabric-1.20/              # Targets MC 1.20.x
-├── fabric-1.21/              # Targets MC 1.21.0-1.21.4
-├── fabric-1.21.5/            # Targets MC 1.21.5-1.21.8
-├── fabric-1.21.9/            # Targets MC 1.21.9-1.21.10
+├── fabric-1.14.4/            # Targets MC 1.14.4
+├── fabric-1.15.2/            # Targets MC 1.15.2
+├── fabric-1.16.5/            # Targets MC 1.16.5
+├── fabric-1.17.1/            # Targets MC 1.17.1
+├── fabric-1.18.2/            # Targets MC 1.18.2
+├── fabric-1.19.2/            # Targets MC 1.19.2
+├── fabric-1.19.4/            # Targets MC 1.19.4
+├── fabric-1.20/              # Targets MC 1.20.4
+├── fabric-1.20.1/            # Targets MC 1.20.1
+├── fabric-1.20.6/            # Targets MC 1.20.6
+├── fabric-1.21.1/            # Targets MC 1.21.1
+├── fabric-1.21.3/            # Targets MC 1.21.3
+├── fabric-1.21.4/            # Targets MC 1.21.4
+├── fabric-1.21.5/            # Targets MC 1.21.5
+├── fabric-1.21.8/            # Targets MC 1.21.8
+├── fabric-1.21.10/           # Targets MC 1.21.10
 ├── forge-*/                  # Forge modules
 ├── legacy-fabric/            # MC 1.8.9-1.13.2
 └── neoforge-*/               # NeoForge modules
@@ -56,21 +65,24 @@ dependencies {
 
 ### Current Fabric API Versions
 
-| Module | MC Version | Fabric API Version |
-|--------|-----------|-------------------|
-| `fabric-1.21.10` | 1.21.10 | **0.138.3+1.21.10** |
-| `fabric-1.21.8` | 1.21.8 | 0.136.1+1.21.8 |
-| `fabric-1.21.5` | 1.21.5 | 0.128.2+1.21.5 |
-| `fabric-1.21.3` | 1.21.3 | 0.114.1+1.21.3 |
-| `fabric-1.21` | 1.21.4 | 0.119.4+1.21.4 |
-| `fabric-1.21.1` | 1.21.1 | 0.116.7+1.21.1 |
-| `fabric-1.20.6` | 1.20.6 | 0.100.8+1.20.6 |
-| `fabric-1.20` | 1.20.4 | 0.97.3+1.20.4 |
-| `fabric-1.20.1` | 1.20.1 | 0.92.5+1.20.1 |
-| `fabric-1.19` | 1.19.4 | 0.87.2+1.19.4 |
-| `fabric-1.19.2` | 1.19.2 | 0.77.0+1.19.2 |
-| `fabric-1.18.2` | 1.18.2 | 0.76.0+1.18.2 |
-| `fabric-1.16.5` | 1.16.5 | 0.42.0+1.16 |
+| Module | MC Version | Fabric API Version | Notes |
+|--------|-----------|-------------------|-------|
+| `fabric-1.21.10` | 1.21.10 | **0.138.3+1.21.10** | Latest |
+| `fabric-1.21.8` | 1.21.8 | 0.136.1+1.21.8 | |
+| `fabric-1.21.5` | 1.21.5 | 0.128.2+1.21.5 | |
+| `fabric-1.21.4` | 1.21.4 | 0.119.4+1.21.4 | |
+| `fabric-1.21.3` | 1.21.3 | 0.114.1+1.21.3 | |
+| `fabric-1.21.1` | 1.21.1 | 0.116.7+1.21.1 | |
+| `fabric-1.20.6` | 1.20.6 | 0.100.8+1.20.6 | |
+| `fabric-1.20` | 1.20.4 | 0.97.3+1.20.4 | |
+| `fabric-1.20.1` | 1.20.1 | 0.92.5+1.20.1 | |
+| `fabric-1.19.4` | 1.19.4 | 0.87.2+1.19.4 | |
+| `fabric-1.19.2` | 1.19.2 | 0.77.0+1.19.2 | |
+| `fabric-1.18.2` | 1.18.2 | 0.76.0+1.18.2 | JOML Matrix4f |
+| `fabric-1.17.1` | 1.17.1 | 0.46.1+1.17 | JOML Matrix4f |
+| `fabric-1.16.5` | 1.16.5 | 0.42.0+1.16 | Mojang Matrix4f |
+| `fabric-1.15.2` | 1.15.2 | 0.28.5+1.15 | Mojang Matrix4f |
+| `fabric-1.14.4` | 1.14.4 | 0.28.5+1.14 | Mojang Matrix4f |
 
 ### How to Update
 
@@ -180,6 +192,37 @@ Wait until:
 ⚠️ **More modules to maintain** - Each needs dependency updates
 ⚠️ **Larger repository** - More code duplication in platform layers
 
+## Compatibility Notes
+
+### Matrix4f API Change (MC 1.17)
+
+Minecraft 1.17 introduced a **breaking change** in the rendering API:
+
+**MC 1.14-1.16.5** (Mojang Matrix4f):
+```java
+import net.minecraft.util.math.Matrix4f;
+Matrix4f matrix = matrices.peek().getModel();
+```
+
+**MC 1.17+** (JOML Matrix4f):
+```java
+import org.joml.Matrix4f;
+Matrix4f matrix = matrices.peek().getPositionMatrix();
+```
+
+Our platform implementations handle this automatically:
+- `fabric-1.14.4`, `fabric-1.15.2`, `fabric-1.16.5` use Mojang's Matrix4f
+- `fabric-1.17.1` and newer use JOML Matrix4f
+
+No changes needed in `common/` module - it's platform-agnostic!
+
+### Legacy Fabric Loader Support
+
+Older Minecraft versions (1.14.4, 1.15.2) require:
+- Fabric Loader 0.11.0+ (instead of 0.14.0+)
+- Different Loom versions for building
+- May have limited Fabric API features
+
 ## Best Practices
 
 1. **Keep `common/` pure** - No Minecraft imports, only interfaces
@@ -187,6 +230,7 @@ Wait until:
 3. **Test each module independently** - Don't assume they all work
 4. **Document version support** - Keep README and mod metadata up to date
 5. **Don't support snapshots** - Only stable Minecraft releases
+6. **Be aware of API changes** - Major MC versions may require platform code updates
 
 ## Troubleshooting
 
