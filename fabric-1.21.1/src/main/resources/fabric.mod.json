@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "spawnersphere",
+  "version": "1.0.0",
+  "name": "Spawner Sphere Mod",
+  "description": "Displays a toggleable sphere around mob spawners showing their activation range",
+  "authors": ["Example Author"],
+  "contact": {
+    "homepage": "https://example.com/",
+    "sources": "https://github.com/example/spawnersphere"
+  },
+  "license": "MIT",
+  "icon": "assets/spawnersphere/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.example.spawnersphere.SpawnerSphereMod"
+    ],
+    "modmenu": [
+      "com.example.spawnersphere.ModMenuIntegration"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "fabric-api": "*",
+    "minecraft": ">=1.21.0 <1.21.5"
+  },
+  "suggests": {
+    "modmenu": ">=11.0.0"
+  },
+  "custom": {
+    "modmenu": {
+      "badges": ["client"]
+    }
+  }
+}
