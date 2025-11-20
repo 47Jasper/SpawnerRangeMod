@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "spawnersphere",
+  "version": "${version}",
+  "name": "Spawner Sphere",
+  "description": "Displays a toggleable wireframe sphere around mob spawners showing their activation range",
+  "authors": [
+    "SpawnerSphere Team"
+  ],
+  "contact": {
+    "homepage": "https://github.com/example/spawner-sphere-mod",
+    "sources": "https://github.com/example/spawner-sphere-mod"
+  },
+  "license": "MIT",
+  "icon": "assets/spawnersphere/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.example.spawnersphere.SpawnerSphereMod"
+    ],
+    "modmenu": [
+      "com.example.spawnersphere.ModMenuIntegration"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.14.0",
+    "fabric": "*",
+    "minecraft": "~1.17.1"
+  }
+}
