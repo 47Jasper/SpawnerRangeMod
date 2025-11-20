@@ -12,8 +12,6 @@ import com.example.spawnersphere.common.platform.IRenderer.SphereColor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -219,81 +217,81 @@ public class SpawnerSphereCore {
                 spawnersToRender = new ArrayList<>(spawnerPositions.values());
             }
 
-        // Track nearest spawner for action bar message (to avoid spam with multiple spawners)
-        double nearestDistance = Double.MAX_VALUE;
-        SpawnerData nearestSpawner = null;
+            // Track nearest spawner for action bar message (to avoid spam with multiple spawners)
+            double nearestDistance = Double.MAX_VALUE;
+            SpawnerData nearestSpawner = null;
 
-        // Render all tracked spawners (validation moved to tick phase for performance)
-        for (SpawnerData spawner : spawnersToRender) {
-            // Calculate distance from player to spawner center
-            double distance = playerPos.distanceTo(spawner.center);
+            // Render all tracked spawners (validation moved to tick phase for performance)
+            for (SpawnerData spawner : spawnersToRender) {
+                // Calculate distance from player to spawner center
+                double distance = playerPos.distanceTo(spawner.center);
 
-            // Only render if within extended range
-            if (distance < scanRadius + sphereRadius) {
-                // Frustum culling (if enabled)
-                if (config.isEnableFrustumCulling()) {
-                    IPlatformHelper.LookVector lookVec = platformHelper.getPlayerLookVector(player);
-                    boolean isVisible = FrustumCuller.isVisible(
-                        spawner.center,
+                // Only render if within extended range
+                if (distance < scanRadius + sphereRadius) {
+                    // Frustum culling (if enabled)
+                    if (config.isEnableFrustumCulling()) {
+                        IPlatformHelper.LookVector lookVec = platformHelper.getPlayerLookVector(player);
+                        boolean isVisible = FrustumCuller.isVisible(
+                            spawner.center,
+                            sphereRadius,
+                            playerPos,
+                            lookVec.x, lookVec.y, lookVec.z,
+                            90.0f // Default FOV, could be made configurable
+                        );
+                        if (!isVisible) {
+                            continue; // Skip rendering this sphere
+                        }
+                    }
+
+                    // Determine if player is within activation range
+                    boolean inRange = distance <= sphereRadius;
+
+                    // Select color based on range
+                    SphereColor color = inRange ?
+                        new SphereColor(
+                            config.getInsideRangeColor().getRedFloat(),
+                            config.getInsideRangeColor().getGreenFloat(),
+                            config.getInsideRangeColor().getBlueFloat(),
+                            config.getInsideRangeColor().getAlphaFloat()
+                        ) :
+                        new SphereColor(
+                            config.getOutsideRangeColor().getRedFloat(),
+                            config.getOutsideRangeColor().getGreenFloat(),
+                            config.getOutsideRangeColor().getBlueFloat(),
+                            config.getOutsideRangeColor().getAlphaFloat()
+                        );
+
+                    // Calculate segment count based on distance (LOD)
+                    int segments;
+                    if (config.isEnableLOD()) {
+                        segments = LODCalculator.calculateSegments(
+                            distance,
+                            config.getLodMaxSegments(),
+                            config.getLodMinSegments(),
+                            config.getLodDistance()
+                        );
+                    } else {
+                        segments = config.getSphereSegments();
+                    }
+
+                    // Render the sphere
+                    renderer.renderSphere(
+                        renderContext,
+                        spawner.center.x,
+                        spawner.center.y,
+                        spawner.center.z,
                         sphereRadius,
-                        playerPos,
-                        lookVec.x, lookVec.y, lookVec.z,
-                        90.0f // Default FOV, could be made configurable
+                        color,
+                        segments
                     );
-                    if (!isVisible) {
-                        continue; // Skip rendering this sphere
+
+                    // Track nearest spawner in range for action bar message
+                    if (config.isShowDistanceInActionBar() && inRange && distance < nearestDistance) {
+                        nearestDistance = distance;
+                        nearestSpawner = spawner;
                     }
                 }
-
-                // Determine if player is within activation range
-                boolean inRange = distance <= sphereRadius;
-
-                // Select color based on range
-                SphereColor color = inRange ?
-                    new SphereColor(
-                        config.getInsideRangeColor().getRedFloat(),
-                        config.getInsideRangeColor().getGreenFloat(),
-                        config.getInsideRangeColor().getBlueFloat(),
-                        config.getInsideRangeColor().getAlphaFloat()
-                    ) :
-                    new SphereColor(
-                        config.getOutsideRangeColor().getRedFloat(),
-                        config.getOutsideRangeColor().getGreenFloat(),
-                        config.getOutsideRangeColor().getBlueFloat(),
-                        config.getOutsideRangeColor().getAlphaFloat()
-                    );
-
-                // Calculate segment count based on distance (LOD)
-                int segments;
-                if (config.isEnableLOD()) {
-                    segments = LODCalculator.calculateSegments(
-                        distance,
-                        config.getLodMaxSegments(),
-                        config.getLodMinSegments(),
-                        config.getLodDistance()
-                    );
-                } else {
-                    segments = config.getSphereSegments();
-                }
-
-                // Render the sphere
-                renderer.renderSphere(
-                    renderContext,
-                    spawner.center.x,
-                    spawner.center.y,
-                    spawner.center.z,
-                    sphereRadius,
-                    color,
-                    segments
-                );
-
-                // Track nearest spawner in range for action bar message
-                if (config.isShowDistanceInActionBar() && inRange && distance < nearestDistance) {
-                    nearestDistance = distance;
-                    nearestSpawner = spawner;
-                }
             }
-        }
 
             // Show distance to nearest spawner (avoids spam with multiple spawners)
             if (config.isShowDistanceInActionBar() && nearestSpawner != null) {
