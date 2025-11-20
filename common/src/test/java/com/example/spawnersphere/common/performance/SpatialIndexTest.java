@@ -1,5 +1,6 @@
 package com.example.spawnersphere.common.performance;
 
+import com.example.spawnersphere.common.data.SpawnerData;
 import com.example.spawnersphere.common.platform.IPlatformHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ public class SpatialIndexTest {
     @Test
     public void testEmptyIndex() {
         IPlatformHelper.Position center = new IPlatformHelper.Position(0, 0, 0);
-        List<SpatialIndex.SpawnerEntry> nearby = index.getNearby(center, 32);
+        List<SpawnerData> nearby = index.getNearby(center, 32);
         assertTrue(nearby.isEmpty());
     }
 
@@ -42,7 +43,7 @@ public class SpatialIndexTest {
 
         // Query from origin with radius 32
         IPlatformHelper.Position center = new IPlatformHelper.Position(0, 64, 0);
-        List<SpatialIndex.SpawnerEntry> nearby = index.getNearby(center, 32);
+        List<SpawnerData> nearby = index.getNearby(center, 32);
 
         // Should find spawner1 but not spawner2
         assertEquals(1, nearby.size());
@@ -59,7 +60,7 @@ public class SpatialIndexTest {
 
         // Query from origin with radius 20
         IPlatformHelper.Position center = new IPlatformHelper.Position(0, 64, 0);
-        List<SpatialIndex.SpawnerEntry> nearby = index.getNearby(center, 20);
+        List<SpawnerData> nearby = index.getNearby(center, 20);
 
         // Should find all 4 spawners
         assertEquals(4, nearby.size());
@@ -73,7 +74,7 @@ public class SpatialIndexTest {
         index.clear();
 
         IPlatformHelper.Position center = new IPlatformHelper.Position(0, 64, 0);
-        List<SpatialIndex.SpawnerEntry> nearby = index.getNearby(center, 32);
+        List<SpawnerData> nearby = index.getNearby(center, 32);
 
         assertTrue(nearby.isEmpty());
     }
@@ -88,7 +89,7 @@ public class SpatialIndexTest {
 
         // Query from center with radius that should catch all
         IPlatformHelper.Position center = new IPlatformHelper.Position(8, 64, 8);
-        List<SpatialIndex.SpawnerEntry> nearby = index.getNearby(center, 20);
+        List<SpawnerData> nearby = index.getNearby(center, 20);
 
         assertEquals(4, nearby.size());
     }
@@ -99,7 +100,7 @@ public class SpatialIndexTest {
         index.add("spawner", spawnerPos);
 
         IPlatformHelper.Position center = new IPlatformHelper.Position(0, 64, 0);
-        List<SpatialIndex.SpawnerEntry> nearby = index.getNearby(center, 15);
+        List<SpawnerData> nearby = index.getNearby(center, 15);
 
         assertEquals(1, nearby.size());
         assertEquals(spawnerPos, nearby.get(0).center);
@@ -113,7 +114,7 @@ public class SpatialIndexTest {
 
         // Query with radius = distance
         IPlatformHelper.Position center = new IPlatformHelper.Position(0, 64, 0);
-        List<SpatialIndex.SpawnerEntry> nearby = index.getNearby(center, 10);
+        List<SpawnerData> nearby = index.getNearby(center, 10);
 
         // Should include spawner at exactly radius distance
         assertEquals(1, nearby.size());
@@ -128,7 +129,7 @@ public class SpatialIndexTest {
 
         // Query from origin at Y=64 with radius 15
         IPlatformHelper.Position center = new IPlatformHelper.Position(0, 64, 0);
-        List<SpatialIndex.SpawnerEntry> nearby = index.getNearby(center, 15);
+        List<SpawnerData> nearby = index.getNearby(center, 15);
 
         // Distance uses 3D Euclidean: sqrt(dx^2 + dy^2 + dz^2)
         // spawner1: sqrt(10^2 + 0^2 + 0^2) = 10 (within radius 15)
@@ -146,7 +147,7 @@ public class SpatialIndexTest {
         index.add(spawner, pos);
 
         // Verify it's there
-        List<SpatialIndex.SpawnerEntry> nearby = index.getNearby(pos, 5);
+        List<SpawnerData> nearby = index.getNearby(pos, 5);
         assertEquals(1, nearby.size());
 
         // Remove it
@@ -170,7 +171,7 @@ public class SpatialIndexTest {
 
         // Verify both are there
         IPlatformHelper.Position center = new IPlatformHelper.Position(0, 64, 0);
-        List<SpatialIndex.SpawnerEntry> nearby = index.getNearby(center, 10);
+        List<SpawnerData> nearby = index.getNearby(center, 10);
         assertEquals(2, nearby.size());
 
         // Remove one
@@ -195,7 +196,7 @@ public class SpatialIndexTest {
         index.remove(spawner, pos); // Should not remove spawner2
 
         // Verify spawner2 is still there
-        List<SpatialIndex.SpawnerEntry> nearby = index.getNearby(pos, 5);
+        List<SpawnerData> nearby = index.getNearby(pos, 5);
         assertEquals(1, nearby.size());
     }
 
@@ -214,7 +215,7 @@ public class SpatialIndexTest {
         index.remove(spawner1, pos1);
 
         // Verify spawner2 in different chunk is unaffected
-        List<SpatialIndex.SpawnerEntry> nearby = index.getNearby(pos2, 5);
+        List<SpawnerData> nearby = index.getNearby(pos2, 5);
         assertEquals(1, nearby.size());
         assertEquals(spawner2, nearby.get(0).blockPos);
     }
