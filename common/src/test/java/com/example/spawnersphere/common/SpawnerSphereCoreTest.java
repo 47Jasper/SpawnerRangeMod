@@ -342,6 +342,9 @@ public class SpawnerSphereCoreTest {
         // Remove spawner
         world.removeSpawner(spawnerPos);
 
+        // Trigger cleanup by calling tick (cleanup is in tick, not render)
+        core.tick(player, world);
+
         renderer.renderedSpheres.clear();
         core.render(new Object(), player, world);
 

@@ -48,6 +48,12 @@ public class FrustumCuller {
         double ndy = dy / distance;
         double ndz = dz / distance;
 
+        // Check for zero look vector (invalid) - return true as safe fallback
+        double lookLengthSq = lookX * lookX + lookY * lookY + lookZ * lookZ;
+        if (lookLengthSq < 0.0001) {
+            return true; // Can't determine direction, render to be safe
+        }
+
         // Look direction is already normalized by LookVector constructor
         // No need to normalize again (saves sqrt calculation)
 
