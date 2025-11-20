@@ -1,83 +1,152 @@
 package com.example.spawnersphere.common.performance;
 
+import com.example.spawnersphere.common.data.SpawnerData;
 import com.example.spawnersphere.common.platform.IPlatformHelper.Position;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Chunk-based spatial index for efficient spawner lookup
  * Groups spawners by chunk coordinates for faster queries
+ * Thread-safe implementation using read-write locks
  */
 public class SpatialIndex {
 
-    private final Map<ChunkCoord, List<SpawnerEntry>> chunkMap;
+    private final Map<ChunkCoord, List<SpawnerData>> chunkMap;
     private static final int CHUNK_SIZE = 16;
 
+    // Use read-write lock for better concurrency (multiple readers, single writer)
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+
     public SpatialIndex() {
-        this.chunkMap = new HashMap<ChunkCoord, List<SpawnerEntry>>();
+        this.chunkMap = new ConcurrentHashMap<ChunkCoord, List<SpawnerData>>();
     }
 
     /**
      * Add a spawner to the spatial index
      */
     public void add(Object blockPos, Position center) {
-        ChunkCoord chunkCoord = getChunkCoord(center);
-        List<SpawnerEntry> spawners = chunkMap.get(chunkCoord);
-        if (spawners == null) {
-            spawners = new ArrayList<SpawnerEntry>();
-            chunkMap.put(chunkCoord, spawners);
+        if (blockPos == null || center == null) {
+            throw new IllegalArgumentException("blockPos and center cannot be null");
         }
-        spawners.add(new SpawnerEntry(blockPos, center));
+        lock.writeLock().lock();
+        try {
+            ChunkCoord chunkCoord = getChunkCoord(center);
+            List<SpawnerData> spawners = chunkMap.get(chunkCoord);
+            if (spawners == null) {
+                spawners = new ArrayList<SpawnerData>();
+                chunkMap.put(chunkCoord, spawners);
+            }
+            // Synchronize list access since ArrayList is not thread-safe
+            synchronized (spawners) {
+                spawners.add(new SpawnerData(blockPos, center));
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * Add a spawner to the spatial index using existing SpawnerData
+     */
+    public void add(SpawnerData data) {
+        if (data == null) {
+            throw new IllegalArgumentException("data cannot be null");
+        }
+        lock.writeLock().lock();
+        try {
+            ChunkCoord chunkCoord = getChunkCoord(data.center);
+            List<SpawnerData> spawners = chunkMap.get(chunkCoord);
+            if (spawners == null) {
+                spawners = new ArrayList<SpawnerData>();
+                chunkMap.put(chunkCoord, spawners);
+            }
+            // Synchronize list access since ArrayList is not thread-safe
+            synchronized (spawners) {
+                spawners.add(data);
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     /**
      * Get all spawners within a given radius of a position
      * Uses chunk-based lookup for efficiency
+     * Thread-safe with read lock for concurrent queries
      */
-    public List<SpawnerEntry> getNearby(Position center, int radius) {
-        List<SpawnerEntry> result = new ArrayList<SpawnerEntry>();
+    public List<SpawnerData> getNearby(Position center, int radius) {
+        if (center == null) {
+            throw new IllegalArgumentException("center cannot be null");
+        }
+        if (radius < 0) {
+            throw new IllegalArgumentException("radius must be non-negative");
+        }
 
-        int chunkRadius = (radius / CHUNK_SIZE) + 1;
-        ChunkCoord centerChunk = getChunkCoord(center);
+        lock.readLock().lock();
+        try {
+            List<SpawnerData> result = new ArrayList<SpawnerData>();
 
-        for (int cx = -chunkRadius; cx <= chunkRadius; cx++) {
-            for (int cz = -chunkRadius; cz <= chunkRadius; cz++) {
-                ChunkCoord coord = new ChunkCoord(
-                    centerChunk.x + cx,
-                    centerChunk.z + cz
-                );
+            int chunkRadius = (radius / CHUNK_SIZE) + 1;
+            ChunkCoord centerChunk = getChunkCoord(center);
 
-                List<SpawnerEntry> spawners = chunkMap.get(coord);
-                if (spawners != null) {
-                    // Filter by actual distance
-                    for (SpawnerEntry entry : spawners) {
-                        double distance = center.distanceTo(entry.center);
-                        if (distance <= radius) {
-                            result.add(entry);
+            for (int cx = -chunkRadius; cx <= chunkRadius; cx++) {
+                for (int cz = -chunkRadius; cz <= chunkRadius; cz++) {
+                    ChunkCoord coord = new ChunkCoord(
+                        centerChunk.x + cx,
+                        centerChunk.z + cz
+                    );
+
+                    List<SpawnerData> spawners = chunkMap.get(coord);
+                    if (spawners != null) {
+                        // Synchronize list access to create thread-safe snapshot
+                        synchronized (spawners) {
+                            // Filter by actual distance
+                            for (SpawnerData entry : spawners) {
+                                double distance = center.distanceTo(entry.center);
+                                if (distance <= radius) {
+                                    result.add(entry);
+                                }
+                            }
                         }
                     }
                 }
             }
-        }
 
-        return result;
+            return result;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     /**
      * Remove a spawner from the spatial index
      */
     public void remove(Object blockPos, Position center) {
-        ChunkCoord chunkCoord = getChunkCoord(center);
-        List<SpawnerEntry> spawners = chunkMap.get(chunkCoord);
-        if (spawners != null) {
-            spawners.removeIf(entry -> entry.blockPos.equals(blockPos));
-            // Clean up empty chunk lists to prevent memory waste
-            if (spawners.isEmpty()) {
-                chunkMap.remove(chunkCoord);
+        if (blockPos == null || center == null) {
+            return; // Gracefully handle null inputs
+        }
+        lock.writeLock().lock();
+        try {
+            ChunkCoord chunkCoord = getChunkCoord(center);
+            List<SpawnerData> spawners = chunkMap.get(chunkCoord);
+            if (spawners != null) {
+                // Synchronize list access and cleanup in single block
+                synchronized (spawners) {
+                    spawners.removeIf(entry -> entry.blockPos.equals(blockPos));
+                    // Clean up empty chunk lists to prevent memory waste
+                    if (spawners.isEmpty()) {
+                        chunkMap.remove(chunkCoord);
+                    }
+                }
             }
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 
@@ -85,7 +154,12 @@ public class SpatialIndex {
      * Clear all entries
      */
     public void clear() {
-        chunkMap.clear();
+        lock.writeLock().lock();
+        try {
+            chunkMap.clear();
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     /**
@@ -125,28 +199,20 @@ public class SpatialIndex {
     }
 
     /**
-     * Spawner entry in the spatial index
+     * Get the number of spawners in the index
      */
-    public static class SpawnerEntry {
-        public final Object blockPos;
-        public final Position center;
-
-        public SpawnerEntry(Object blockPos, Position center) {
-            this.blockPos = blockPos;
-            this.center = center;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            SpawnerEntry that = (SpawnerEntry) o;
-            return blockPos.equals(that.blockPos);
-        }
-
-        @Override
-        public int hashCode() {
-            return blockPos.hashCode();
+    public int size() {
+        lock.readLock().lock();
+        try {
+            int count = 0;
+            for (List<SpawnerData> spawners : chunkMap.values()) {
+                synchronized (spawners) {
+                    count += spawners.size();
+                }
+            }
+            return count;
+        } finally {
+            lock.readLock().unlock();
         }
     }
 }

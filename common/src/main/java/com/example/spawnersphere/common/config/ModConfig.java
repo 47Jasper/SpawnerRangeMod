@@ -1,6 +1,8 @@
 package com.example.spawnersphere.common.config;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -210,6 +212,7 @@ public class ModConfig {
 
     /**
      * Load configuration from file
+     * Uses setters to ensure validation logic is applied
      */
     public void load() {
         if (configFile == null || !configFile.exists()) {
@@ -220,22 +223,25 @@ public class ModConfig {
             Properties props = new Properties();
             props.load(fis);
 
-            // Load all config values
-            sphereRadius = Integer.parseInt(props.getProperty("sphereRadius", String.valueOf(sphereRadius)));
-            scanRadius = Integer.parseInt(props.getProperty("scanRadius", String.valueOf(scanRadius)));
-            scanInterval = Long.parseLong(props.getProperty("scanInterval", String.valueOf(scanInterval)));
+            // Load all config values using setters to apply validation
+            // Load scanRadius first to avoid validation issues with sphereRadius
+            setScanRadius(Integer.parseInt(props.getProperty("scanRadius", String.valueOf(scanRadius))));
+            setSphereRadius(Integer.parseInt(props.getProperty("sphereRadius", String.valueOf(sphereRadius))));
+            setScanInterval(Long.parseLong(props.getProperty("scanInterval", String.valueOf(scanInterval))));
 
-            sphereSegments = Integer.parseInt(props.getProperty("sphereSegments", String.valueOf(sphereSegments)));
-            renderEquator = Boolean.parseBoolean(props.getProperty("renderEquator", String.valueOf(renderEquator)));
-            showDistanceInActionBar = Boolean.parseBoolean(props.getProperty("showDistanceInActionBar", String.valueOf(showDistanceInActionBar)));
+            setSphereSegments(Integer.parseInt(props.getProperty("sphereSegments", String.valueOf(sphereSegments))));
+            setRenderEquator(Boolean.parseBoolean(props.getProperty("renderEquator", String.valueOf(renderEquator))));
+            setShowDistanceInActionBar(Boolean.parseBoolean(props.getProperty("showDistanceInActionBar", String.valueOf(showDistanceInActionBar))));
 
-            enableSpatialIndexing = Boolean.parseBoolean(props.getProperty("enableSpatialIndexing", String.valueOf(enableSpatialIndexing)));
-            enableFrustumCulling = Boolean.parseBoolean(props.getProperty("enableFrustumCulling", String.valueOf(enableFrustumCulling)));
-            enableLOD = Boolean.parseBoolean(props.getProperty("enableLOD", String.valueOf(enableLOD)));
-            lodMaxSegments = Integer.parseInt(props.getProperty("lodMaxSegments", String.valueOf(lodMaxSegments)));
-            lodMinSegments = Integer.parseInt(props.getProperty("lodMinSegments", String.valueOf(lodMinSegments)));
-            lodDistance = Double.parseDouble(props.getProperty("lodDistance", String.valueOf(lodDistance)));
-            movementThreshold = Double.parseDouble(props.getProperty("movementThreshold", String.valueOf(movementThreshold)));
+            setEnableSpatialIndexing(Boolean.parseBoolean(props.getProperty("enableSpatialIndexing", String.valueOf(enableSpatialIndexing))));
+            setEnableFrustumCulling(Boolean.parseBoolean(props.getProperty("enableFrustumCulling", String.valueOf(enableFrustumCulling))));
+            setEnableLOD(Boolean.parseBoolean(props.getProperty("enableLOD", String.valueOf(enableLOD))));
+
+            // Load LOD max segments first to avoid validation issues with min segments
+            setLodMaxSegments(Integer.parseInt(props.getProperty("lodMaxSegments", String.valueOf(lodMaxSegments))));
+            setLodMinSegments(Integer.parseInt(props.getProperty("lodMinSegments", String.valueOf(lodMinSegments))));
+            setLodDistance(Double.parseDouble(props.getProperty("lodDistance", String.valueOf(lodDistance))));
+            setMovementThreshold(Double.parseDouble(props.getProperty("movementThreshold", String.valueOf(movementThreshold))));
 
             // Load colors
             outsideRangeColor = new ColorConfig(
@@ -250,10 +256,89 @@ public class ModConfig {
                 Integer.parseInt(props.getProperty("insideRangeColor.blue", "0")),
                 Integer.parseInt(props.getProperty("insideRangeColor.alpha", "102"))
             );
-        } catch (IOException | NumberFormatException e) {
-            // If load fails, keep default values
-            System.err.println("Failed to load config: " + e.getMessage());
+
+            // Validate the final configuration state
+            validateConfig();
+        } catch (IOException e) {
+            System.err.println("Failed to load config file: " + e.getMessage());
+            // Keep default values
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid number format in config file: " + e.getMessage());
+            // Keep default values
+        } catch (IllegalStateException e) {
+            System.err.println("Config validation failed: " + e.getMessage());
+            // Reset to safe defaults
+            resetToDefaults();
         }
+    }
+
+    /**
+     * Validate the entire configuration state
+     * @throws IllegalStateException if configuration is invalid
+     */
+    private void validateConfig() throws IllegalStateException {
+        List<String> errors = new ArrayList<>();
+
+        // Validate sphereRadius <= scanRadius
+        if (sphereRadius > scanRadius) {
+            errors.add("sphereRadius (" + sphereRadius + ") must be <= scanRadius (" + scanRadius + ")");
+        }
+
+        // Validate LOD parameters
+        if (lodMaxSegments < lodMinSegments) {
+            errors.add("lodMaxSegments (" + lodMaxSegments + ") must be >= lodMinSegments (" + lodMinSegments + ")");
+        }
+
+        // Validate ranges
+        if (sphereRadius < 1 || sphereRadius > 64) {
+            errors.add("sphereRadius must be between 1 and 64");
+        }
+        if (scanRadius < 16 || scanRadius > 256) {
+            errors.add("scanRadius must be between 16 and 256");
+        }
+        if (sphereSegments < 8 || sphereSegments > 64) {
+            errors.add("sphereSegments must be between 8 and 64");
+        }
+        if (lodMaxSegments < 8 || lodMaxSegments > 64) {
+            errors.add("lodMaxSegments must be between 8 and 64");
+        }
+        if (lodMinSegments < 4 || lodMinSegments > 32) {
+            errors.add("lodMinSegments must be between 4 and 32");
+        }
+        if (lodDistance < 16.0 || lodDistance > 128.0) {
+            errors.add("lodDistance must be between 16.0 and 128.0");
+        }
+        if (movementThreshold < 1.0 || movementThreshold > 64.0) {
+            errors.add("movementThreshold must be between 1.0 and 64.0");
+        }
+        if (scanInterval < 1000) {
+            errors.add("scanInterval must be >= 1000 milliseconds");
+        }
+
+        if (!errors.isEmpty()) {
+            throw new IllegalStateException("Configuration validation failed:\n" + String.join("\n", errors));
+        }
+    }
+
+    /**
+     * Reset all configuration values to safe defaults
+     */
+    private void resetToDefaults() {
+        sphereRadius = 16;
+        scanRadius = 64;
+        scanInterval = 60000;
+        outsideRangeColor = new ColorConfig(128, 255, 0, 51);
+        insideRangeColor = new ColorConfig(255, 128, 0, 102);
+        sphereSegments = 24;
+        renderEquator = true;
+        showDistanceInActionBar = false;
+        enableSpatialIndexing = true;
+        enableFrustumCulling = false;
+        enableLOD = true;
+        lodMaxSegments = 32;
+        lodMinSegments = 16;
+        lodDistance = 32.0;
+        movementThreshold = 16.0;
     }
 
     /**
