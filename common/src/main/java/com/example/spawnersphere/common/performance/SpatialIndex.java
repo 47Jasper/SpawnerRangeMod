@@ -136,11 +136,10 @@ public class SpatialIndex {
             ChunkCoord chunkCoord = getChunkCoord(center);
             List<SpawnerData> spawners = chunkMap.get(chunkCoord);
             if (spawners != null) {
+                // Synchronize list access and cleanup in single block
                 synchronized (spawners) {
                     spawners.removeIf(entry -> entry.blockPos.equals(blockPos));
-                }
-                // Clean up empty chunk lists to prevent memory waste
-                synchronized (spawners) {
+                    // Clean up empty chunk lists to prevent memory waste
                     if (spawners.isEmpty()) {
                         chunkMap.remove(chunkCoord);
                     }
