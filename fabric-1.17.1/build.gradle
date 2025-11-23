@@ -1,0 +1,27 @@
+plugins {
+    id 'fabric-loom' version '1.4-SNAPSHOT'
+}
+
+dependencies {
+    // Common module
+    implementation project(':common')
+
+    minecraft 'com.mojang:minecraft:1.17.1'
+    mappings "net.fabricmc:yarn:1.17.1+build.65:v2"
+    modImplementation "net.fabricmc:fabric-loader:0.14.21"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:0.46.1+1.17"
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.archivesBaseName}" }
+    }
+}
