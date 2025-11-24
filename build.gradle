@@ -18,7 +18,23 @@ allprojects {
 
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
-        options.release = 8
+        // Java version is set per-subproject based on MC version requirements
+        // Default to Java 8 for older versions, but can be overridden
+        if (!project.hasProperty('javaVersion')) {
+            options.release = 8
+        }
+    }
+
+    // Helper method to configure Java version for subprojects
+    ext.configureJavaVersion = { int version ->
+        java {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(version)
+            }
+        }
+        tasks.withType(JavaCompile) {
+            options.release = version
+        }
     }
 }
 
