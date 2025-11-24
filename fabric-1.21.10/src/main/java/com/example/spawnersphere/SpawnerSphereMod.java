@@ -28,6 +28,8 @@ public class SpawnerSphereMod implements ClientModInitializer {
 
     private static SpawnerSphereCore core;
     private static KeyBinding toggleKey;
+    private static final KeyBinding.Category SPAWNER_SPHERE_CATEGORY =
+        KeyBinding.Category.create("category.spawnersphere");
 
     @Override
     public void onInitializeClient() {
@@ -53,7 +55,7 @@ public class SpawnerSphereMod implements ClientModInitializer {
             "key.spawnersphere.toggle",
             InputUtil.Type.KEYSYM,
             GLFW.GLFW_KEY_B,
-            "category.spawnersphere"
+            SPAWNER_SPHERE_CATEGORY
         ));
 
         // Register tick event for keybinding and periodic updates

@@ -177,8 +177,9 @@ public class ClothConfigScreen implements IConfigScreen {
         try {
             Class.forName("me.shedaniel.clothconfig2.api.ConfigBuilder");
             return true;
-        } catch (ClassNotFoundException | LinkageError | ExceptionInInitializerError e) {
-            // Catch broader exceptions that Class.forName() can throw
+        } catch (ClassNotFoundException | LinkageError e) {
+            // Catch exceptions that Class.forName() can throw
+            // Note: ExceptionInInitializerError extends LinkageError, so it's already covered
             return false;
         }
     }
