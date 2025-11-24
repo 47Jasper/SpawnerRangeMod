@@ -3,8 +3,8 @@
   "package": "com.example.spawnersphere.mixin",
   "compatibilityLevel": "JAVA_8",
   "client": [
-    "GameRendererMixin",
-    "MinecraftClientMixin"
+    "me.jasper.spawnersphere.mixin.GameRendererMixin",
+    "me.jasper.spawnersphere.mixin.MinecraftClientMixin"
   ],
   "injectors": {
     "defaultRequire": 1

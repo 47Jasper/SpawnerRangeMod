@@ -16,10 +16,10 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "com.example.spawnersphere.SpawnerSphereMod"
+      "me.jasper.spawnersphere.SpawnerSphereMod"
     ],
     "modmenu": [
-      "com.example.spawnersphere.ModMenuIntegration"
+      "me.jasper.spawnersphere.ModMenuIntegration"
     ]
   },
   "depends": {
