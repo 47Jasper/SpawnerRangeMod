@@ -43,8 +43,8 @@ public class FabricPlatformHelper implements IPlatformHelper {
                 player != null ? player.getClass().getName() : "null");
             return new Position(0, 0, 0);
         }
-        Vec3d pos = ((ClientPlayerEntity) player).getPos();
-        return new Position(pos.x, pos.y, pos.z);
+        ClientPlayerEntity clientPlayer = (ClientPlayerEntity) player;
+        return new Position(clientPlayer.getX(), clientPlayer.getY(), clientPlayer.getZ());
     }
 
     @Override
