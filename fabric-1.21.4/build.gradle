@@ -2,6 +2,9 @@ plugins {
     id 'fabric-loom' version '1.9-SNAPSHOT'
 }
 
+// Minecraft 1.21.4 requires Java 21
+configureJavaVersion(21)
+
 repositories {
     maven { url = "https://maven.shedaniel.me/" }
     maven { url = "https://maven.terraformersmc.com/releases/" }

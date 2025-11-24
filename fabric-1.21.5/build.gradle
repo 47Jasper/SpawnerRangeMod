@@ -2,10 +2,16 @@ plugins {
     id 'fabric-loom' version '1.10-SNAPSHOT'
 }
 
+// Minecraft 1.21.5 requires Java 21
+configureJavaVersion(21)
+
 repositories {
     maven { url = "https://maven.shedaniel.me/" }
     maven { url = "https://maven.terraformersmc.com/releases/" }
 }
+
+// Minecraft 1.21.5 requires Java 21
+configureJavaVersion(21)
 
 dependencies {
     // Common module
@@ -24,6 +30,9 @@ dependencies {
     modImplementation("com.terraformersmc:modmenu:14.0.0")
 }
 
+// Minecraft 1.21.5 requires Java 21
+configureJavaVersion(21)
+
 processResources {
     inputs.property "version", project.version
     
@@ -32,8 +41,14 @@ processResources {
     }
 }
 
+// Minecraft 1.21.5 requires Java 21
+configureJavaVersion(21)
+
 jar {
     from("LICENSE") {
         rename { "${it}_${project.archivesBaseName}" }
     }
 }
+
+// Minecraft 1.21.5 requires Java 21
+configureJavaVersion(21)

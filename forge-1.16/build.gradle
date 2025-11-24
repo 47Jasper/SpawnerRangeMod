@@ -2,6 +2,9 @@ plugins {
     id 'net.minecraftforge.gradle' version '6.0.+'
 }
 
+// Forge 1.16 with Gradle 6.0+ requires Java 17
+configureJavaVersion(17)
+
 minecraft {
     mappings channel: 'official', version: '1.16.5'
 

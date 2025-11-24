@@ -2,6 +2,9 @@ plugins {
     id 'net.neoforged.gradle.userdev' version '7.1.4'
 }
 
+// NeoForge 20.6.x requires Java 21
+configureJavaVersion(21)
+
 dependencies {
     // Common module
     implementation project(':common')

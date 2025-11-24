@@ -2,6 +2,9 @@ plugins {
     id 'fabric-loom' version '1.4-SNAPSHOT'
 }
 
+// Minecraft 1.17+ requires Java 17
+configureJavaVersion(17)
+
 dependencies {
     // Common module
     implementation project(':common')
