@@ -352,6 +352,7 @@ public class ModConfig {
         // Ensure parent directory exists
         File parentDir = configFile.getParentFile();
         if (parentDir != null && !parentDir.exists()) {
+            //noinspection ResultOfMethodCallIgnored
             parentDir.mkdirs();
         }
 
