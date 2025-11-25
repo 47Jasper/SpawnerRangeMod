@@ -20,6 +20,9 @@
       "me.jasper.spawnersphere.ModMenuIntegration"
     ]
   },
+  "mixins": [
+    "spawnersphere.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=0.17.0",
     "fabric-api": "*",

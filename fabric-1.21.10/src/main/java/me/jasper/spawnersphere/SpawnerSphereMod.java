@@ -9,15 +9,17 @@ import me.jasper.spawnersphere.platform.FabricRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3d;
-import net.fabricmc.loader.api.FabricLoader;
+import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
@@ -60,8 +62,8 @@ public class SpawnerSphereMod implements ClientModInitializer {
         // Register tick event for keybinding and periodic updates
         ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
 
-        // Register render event
-        WorldRenderEvents.AFTER_TRANSLUCENT.register(this::onRenderWorld);
+        // Note: Render event is handled via mixin (WorldRendererMixin) since
+        // WorldRenderEvents was removed in Fabric API for 1.21.9+
     }
 
     private void onClientTick(MinecraftClient client) {
@@ -78,37 +80,40 @@ public class SpawnerSphereMod implements ClientModInitializer {
         }
     }
 
-    private void onRenderWorld(net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext context) {
-        if (!core.isEnabled()) return;
+    /**
+     * Called from WorldRendererMixin to render spheres after world rendering.
+     * This replaces the WorldRenderEvents.AFTER_TRANSLUCENT callback.
+     */
+    @SuppressWarnings("unused")
+    public static void onWorldRender(
+            Camera camera,
+            Matrix4f positionMatrix,
+            Matrix4f projectionMatrix,
+            RenderTickCounter tickCounter
+    ) {
+        if (core == null || !core.isEnabled()) return;
 
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null || client.world == null) return;
 
-        // Get matrices and camera from context
-        MatrixStack matrices = context.matrixStack();
-        Camera camera = context.camera();
-        VertexConsumerProvider consumers = context.consumers();
+        // Create our own immediate vertex consumer provider for rendering
+        VertexConsumerProvider.Immediate immediate = client.getBufferBuilders().getEntityVertexConsumers();
 
-        // Null safety: Check consumers before rendering
-        if (consumers == null || matrices == null || camera == null) return;
+        // Create matrix stack and apply camera transform
+        MatrixStack matrices = new MatrixStack();
+        matrices.multiplyPositionMatrix(positionMatrix);
 
         Vec3d cameraPos = camera.getPos();
-
-        matrices.push();
         matrices.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 
         // Create render context and delegate to core
         FabricRenderer.RenderContext renderContext =
-            new FabricRenderer.RenderContext(matrices, consumers);
+            new FabricRenderer.RenderContext(matrices, immediate);
 
         core.render(renderContext, client.player, client.world);
 
-        matrices.pop();
-
-        // Force draw
-        if (consumers instanceof VertexConsumerProvider.Immediate) {
-            ((VertexConsumerProvider.Immediate) consumers).draw();
-        }
+        // Force draw to ensure our lines are rendered
+        immediate.draw(RenderLayer.getLines());
     }
 
     /**
