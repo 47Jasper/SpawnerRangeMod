@@ -183,6 +183,10 @@ public class SpawnerSphereCore {
      * Render all tracked spawners
      * Should be called from the platform's render event
      * Uses snapshot of spawner data to avoid blocking render thread
+     *
+     * @param renderContext Platform-specific rendering context
+     * @param player Player object for getting position
+     * @param world World object for validating spawner existence during render
      */
     public void render(Object renderContext, Object player, Object world) {
         if (!enabled || spawnerPositions.isEmpty()) return;
@@ -202,16 +206,23 @@ public class SpawnerSphereCore {
                 );
 
                 // Use ConcurrentHashMap.get() for thread-safe O(1) lookup
+                // Also validate spawner still exists in world before rendering
                 spawnersToRender = new ArrayList<>();
                 for (SpawnerData entry : nearbyEntries) {
                     SpawnerData data = spawnerPositions.get(entry.blockPos);
-                    if (data != null) {
+                    if (data != null && platformHelper.isSpawner(world, entry.blockPos)) {
                         spawnersToRender.add(data);
                     }
                 }
             } else {
                 // Create snapshot to avoid concurrent modification
-                spawnersToRender = new ArrayList<>(spawnerPositions.values());
+                // Validate each spawner still exists in world before rendering
+                spawnersToRender = new ArrayList<>();
+                for (SpawnerData data : spawnerPositions.values()) {
+                    if (platformHelper.isSpawner(world, data.blockPos)) {
+                        spawnersToRender.add(data);
+                    }
+                }
             }
 
             // Track nearest spawner for action bar message (to avoid spam with multiple spawners)
@@ -245,18 +256,8 @@ public class SpawnerSphereCore {
 
                     // Select color based on range
                     SphereColor color = inRange ?
-                        new SphereColor(
-                            config.getInsideRangeColor().getRedFloat(),
-                            config.getInsideRangeColor().getGreenFloat(),
-                            config.getInsideRangeColor().getBlueFloat(),
-                            config.getInsideRangeColor().getAlphaFloat()
-                        ) :
-                        new SphereColor(
-                            config.getOutsideRangeColor().getRedFloat(),
-                            config.getOutsideRangeColor().getGreenFloat(),
-                            config.getOutsideRangeColor().getBlueFloat(),
-                            config.getOutsideRangeColor().getAlphaFloat()
-                        );
+                        SphereColor.insideRange(config.getInsideRangeColor()) :
+                        SphereColor.outsideRange(config.getOutsideRangeColor());
 
                     // Calculate segment count based on distance (LOD)
                     int segments;
