@@ -10,6 +10,7 @@ import java.util.Properties;
  */
 public class ModConfig {
 
+    public static final String CONFIG_FILE_NAME = "spawner-sphere-mod.properties";
     private File configFile;
 
     // Sphere rendering
@@ -200,6 +201,13 @@ public class ModConfig {
         public int getGreen() { return green; }
         public int getBlue() { return blue; }
         public int getAlpha() { return alpha; }
+    }
+
+    /**
+     * Get the default configuration file name for this mod
+     */
+    public static String getDefaultConfigFileName() {
+        return CONFIG_FILE_NAME;
     }
 
     /**

@@ -113,7 +113,7 @@ public class SpawnerSphereMod {
         // Delegate to core
         ForgeRenderer.RenderContext renderContext =
             new ForgeRenderer.RenderContext(event.getPartialTicks());
-        core.render(renderContext, mc.player);
+        core.render(renderContext, mc.player, mc.world);
 
         // Restore OpenGL state
         GL11.glEnable(GL11.GL_TEXTURE_2D);

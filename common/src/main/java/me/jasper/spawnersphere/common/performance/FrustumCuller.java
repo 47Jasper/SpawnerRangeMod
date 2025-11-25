@@ -72,14 +72,22 @@ public class FrustumCuller {
     /**
      * Simplified version when look direction is not available
      * Uses a more conservative check
+     *
+     * @param spherePos Center of the sphere
+     * @param sphereRadius Radius of the sphere for boundary checking
+     * @param playerPos Player's position
+     * @param maxDistance Maximum distance to consider as visible
+     * @return true if sphere is visible (center or edge within maxDistance)
      */
     public static boolean isVisibleSimple(
         Position spherePos,
+        float sphereRadius,
         Position playerPos,
         float maxDistance
     ) {
         double distance = playerPos.distanceTo(spherePos);
-        // Conservative: render if within reasonable distance
-        return distance <= maxDistance;
+        // Conservative: render if sphere center or edge is within reasonable distance
+        // This accounts for the sphere's radius when determining visibility
+        return distance <= (maxDistance + sphereRadius);
     }
 }
