@@ -100,7 +100,7 @@ public class SpawnerSphereMod implements ClientModInitializer {
         // Delegate to core (context is null for legacy - not used)
         LegacyFabricRenderer.RenderContext renderContext =
             new LegacyFabricRenderer.RenderContext(partialTicks);
-        core.render(renderContext, client.player, client.world);
+        core.render(renderContext, client.player);
 
         // Restore OpenGL state
         GL11.glEnable(GL11.GL_TEXTURE_2D);

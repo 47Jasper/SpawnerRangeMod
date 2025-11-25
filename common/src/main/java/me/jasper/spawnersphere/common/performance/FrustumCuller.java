@@ -75,7 +75,6 @@ public class FrustumCuller {
      */
     public static boolean isVisibleSimple(
         Position spherePos,
-        float sphereRadius,
         Position playerPos,
         float maxDistance
     ) {

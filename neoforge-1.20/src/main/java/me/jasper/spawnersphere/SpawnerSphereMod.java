@@ -112,7 +112,7 @@ public class SpawnerSphereMod {
             ForgeRenderer.RenderContext renderContext =
                 new ForgeRenderer.RenderContext(poseStack, bufferSource);
 
-            core.render(renderContext, client.player, client.level);
+            core.render(renderContext, client.player);
 
             poseStack.popPose();
 

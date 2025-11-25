@@ -68,7 +68,7 @@ public class SpawnerSphereCoreTest {
         // Toggle on and verify spawner is found
         core.toggle(player, world);
         renderer.renderedSpheres.clear();
-        core.render(new Object(), player, world);
+        core.render(new Object(), player);
         assertEquals(1, renderer.renderedSpheres.size());
 
         // Toggle off
@@ -78,7 +78,7 @@ public class SpawnerSphereCoreTest {
         // If spatial index wasn't cleared, stale data could cause issues
         core.toggle(player, world);
         renderer.renderedSpheres.clear();
-        core.render(new Object(), player, world);
+        core.render(new Object(), player);
         assertEquals(1, renderer.renderedSpheres.size());
     }
 
@@ -101,7 +101,7 @@ public class SpawnerSphereCoreTest {
         world.addSpawner(5, 64, 5);
 
         assertFalse(core.isEnabled());
-        core.render(new Object(), player, world);
+        core.render(new Object(), player);
 
         // Should not render when disabled
         assertEquals(0, renderer.renderedSpheres.size());
@@ -112,7 +112,7 @@ public class SpawnerSphereCoreTest {
         world.addSpawner(5, 64, 5);
 
         core.toggle(player, world);
-        core.render(new Object(), player, world);
+        core.render(new Object(), player);
 
         // Should render the spawner
         assertEquals(1, renderer.renderedSpheres.size());
@@ -125,7 +125,7 @@ public class SpawnerSphereCoreTest {
         world.addSpawner(10, 64, 0); // Distance ~10 blocks
 
         core.toggle(player, world);
-        core.render(new Object(), player, world);
+        core.render(new Object(), player);
 
         // Player is within range (10 < 16), should be red-ish (inside range color)
         assertEquals(1, renderer.renderedSpheres.size());
@@ -140,7 +140,7 @@ public class SpawnerSphereCoreTest {
         world.addSpawner(20, 64, 0); // Distance 20 blocks
 
         core.toggle(player, world);
-        core.render(new Object(), player, world);
+        core.render(new Object(), player);
 
         // Player is outside range (20 > 16), should be green-ish (outside range color)
         assertEquals(1, renderer.renderedSpheres.size());
@@ -159,7 +159,7 @@ public class SpawnerSphereCoreTest {
         // Close spawner
         world.addSpawner(5, 64, 0);
         core.toggle(player, world);
-        core.render(new Object(), player, world);
+        core.render(new Object(), player);
 
         MockRenderer.RenderedSphere sphere = renderer.renderedSpheres.get(0);
         // Close spawners should have max segments
@@ -173,7 +173,7 @@ public class SpawnerSphereCoreTest {
 
         world.addSpawner(5, 64, 0);
         core.toggle(player, world);
-        core.render(new Object(), player, world);
+        core.render(new Object(), player);
 
         MockRenderer.RenderedSphere sphere = renderer.renderedSpheres.get(0);
         // Should use configured sphere segments
@@ -190,7 +190,7 @@ public class SpawnerSphereCoreTest {
         player.lookVector = new IPlatformHelper.LookVector(0, 0, 1);
 
         core.toggle(player, world);
-        core.render(new Object(), player, world);
+        core.render(new Object(), player);
 
         // Spawner behind should be culled
         assertEquals(0, renderer.renderedSpheres.size());
@@ -205,7 +205,7 @@ public class SpawnerSphereCoreTest {
         player.lookVector = new IPlatformHelper.LookVector(0, 0, 1);
 
         core.toggle(player, world);
-        core.render(new Object(), player, world);
+        core.render(new Object(), player);
 
         // Should still render when frustum culling disabled
         assertEquals(1, renderer.renderedSpheres.size());
@@ -221,7 +221,7 @@ public class SpawnerSphereCoreTest {
         }
 
         core.toggle(player, world);
-        core.render(new Object(), player, world);
+        core.render(new Object(), player);
 
         // Should use spatial index for efficient queries
         assertTrue(renderer.renderedSpheres.size() > 0);
@@ -237,7 +237,7 @@ public class SpawnerSphereCoreTest {
 
         // Verify first spawner found
         renderer.renderedSpheres.clear();
-        core.render(new Object(), player, world);
+        core.render(new Object(), player);
         assertEquals(1, renderer.renderedSpheres.size());
 
         // Add second spawner and trigger manual rescan (simulates what periodic tick does)
@@ -246,7 +246,7 @@ public class SpawnerSphereCoreTest {
 
         // Should now find both spawners
         renderer.renderedSpheres.clear();
-        core.render(new Object(), player, world);
+        core.render(new Object(), player);
         assertEquals(2, renderer.renderedSpheres.size());
     }
 
@@ -271,7 +271,7 @@ public class SpawnerSphereCoreTest {
         // Both spawners are still within scan radius (64) from new position (20,64,20):
         // - Spawner at (5,64,5): distance ~21.2 blocks
         // - Spawner at (25,64,25): distance ~7.07 blocks
-        core.render(new Object(), player, world);
+        core.render(new Object(), player);
         assertEquals(2, renderer.renderedSpheres.size());
     }
 
@@ -287,7 +287,7 @@ public class SpawnerSphereCoreTest {
         // Manually trigger rescan
         core.triggerRescan(player, world);
 
-        core.render(new Object(), player, world);
+        core.render(new Object(), player);
         assertEquals(2, renderer.renderedSpheres.size());
     }
 
@@ -322,7 +322,7 @@ public class SpawnerSphereCoreTest {
         core.toggle(player, world);
         platformHelper.lastMessage = null; // Clear toggle message
 
-        core.render(new Object(), player, world);
+        core.render(new Object(), player);
 
         // Should show distance message
         assertNotNull(platformHelper.lastMessage);
@@ -335,7 +335,7 @@ public class SpawnerSphereCoreTest {
         MockBlockPos spawnerPos = world.addSpawner(5, 64, 5);
 
         core.toggle(player, world);
-        core.render(new Object(), player, world);
+        core.render(new Object(), player);
 
         assertEquals(1, renderer.renderedSpheres.size());
 
@@ -346,7 +346,7 @@ public class SpawnerSphereCoreTest {
         core.tick(player, world);
 
         renderer.renderedSpheres.clear();
-        core.render(new Object(), player, world);
+        core.render(new Object(), player);
 
         // Should not render removed spawner
         assertEquals(0, renderer.renderedSpheres.size());

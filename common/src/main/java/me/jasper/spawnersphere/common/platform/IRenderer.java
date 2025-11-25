@@ -1,5 +1,6 @@
 package me.jasper.spawnersphere.common.platform;
 
+import me.jasper.spawnersphere.common.config.ModConfig;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -45,17 +46,27 @@ public interface IRenderer {
         }
 
         /**
-         * Color for when player is outside activation range (Green/Yellow)
+         * Color for when player is outside activation range
          */
-        public static SphereColor outsideRange() {
-            return new SphereColor(0.5f, 1.0f, 0.0f, 0.2f);
+        public static SphereColor outsideRange(@NotNull ModConfig.ColorConfig colorConfig) {
+            return new SphereColor(
+                colorConfig.getRedFloat(),
+                colorConfig.getGreenFloat(),
+                colorConfig.getBlueFloat(),
+                colorConfig.getAlphaFloat()
+            );
         }
 
         /**
-         * Color for when player is inside activation range (Yellow/Red)
+         * Color for when player is inside activation range
          */
-        public static SphereColor insideRange() {
-            return new SphereColor(1.0f, 0.5f, 0.0f, 0.4f);
+        public static SphereColor insideRange(@NotNull ModConfig.ColorConfig colorConfig) {
+            return new SphereColor(
+                colorConfig.getRedFloat(),
+                colorConfig.getGreenFloat(),
+                colorConfig.getBlueFloat(),
+                colorConfig.getAlphaFloat()
+            );
         }
     }
 }

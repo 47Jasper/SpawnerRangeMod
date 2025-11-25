@@ -101,7 +101,7 @@ public class SpawnerSphereMod implements ClientModInitializer {
         FabricRenderer.RenderContext renderContext =
             new FabricRenderer.RenderContext(matrices, consumers);
 
-        core.render(renderContext, client.player, client.world);
+        core.render(renderContext, client.player);
 
         matrices.pop();
 

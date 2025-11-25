@@ -10,7 +10,6 @@ import java.util.Properties;
  */
 public class ModConfig {
 
-    private static final String CONFIG_FILE_NAME = "spawner-sphere-mod.properties";
     private File configFile;
 
     // Sphere rendering

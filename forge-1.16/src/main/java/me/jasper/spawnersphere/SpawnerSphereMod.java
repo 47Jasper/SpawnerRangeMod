@@ -113,7 +113,7 @@ public class SpawnerSphereMod {
             // Create render context and delegate to core
             ForgeRenderer.RenderContext renderContext = new ForgeRenderer.RenderContext(matrixStack);
 
-            core.render(renderContext, client.player, client.world);
+            core.render(renderContext, client.player);
 
             matrixStack.pop();
         }

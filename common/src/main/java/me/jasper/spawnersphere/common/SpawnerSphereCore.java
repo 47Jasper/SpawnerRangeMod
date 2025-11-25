@@ -184,7 +184,7 @@ public class SpawnerSphereCore {
      * Should be called from the platform's render event
      * Uses snapshot of spawner data to avoid blocking render thread
      */
-    public void render(Object renderContext, Object player, Object world) {
+    public void render(Object renderContext, Object player) {
         if (!enabled || spawnerPositions.isEmpty()) return;
 
         try {
@@ -245,18 +245,8 @@ public class SpawnerSphereCore {
 
                     // Select color based on range
                     SphereColor color = inRange ?
-                        new SphereColor(
-                            config.getInsideRangeColor().getRedFloat(),
-                            config.getInsideRangeColor().getGreenFloat(),
-                            config.getInsideRangeColor().getBlueFloat(),
-                            config.getInsideRangeColor().getAlphaFloat()
-                        ) :
-                        new SphereColor(
-                            config.getOutsideRangeColor().getRedFloat(),
-                            config.getOutsideRangeColor().getGreenFloat(),
-                            config.getOutsideRangeColor().getBlueFloat(),
-                            config.getOutsideRangeColor().getAlphaFloat()
-                        );
+                        SphereColor.insideRange(config.getInsideRangeColor()) :
+                        SphereColor.outsideRange(config.getOutsideRangeColor());
 
                     // Calculate segment count based on distance (LOD)
                     int segments;
