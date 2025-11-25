@@ -30,8 +30,12 @@ public class FabricRenderer implements IRenderer {
     ) {
         if (!(context instanceof RenderContext)) {
             LOGGER.warn("renderSphere called with invalid context type: {}",
-                context != null ? context.getClass().getName() : "null");
+                context.getClass().getName());
             return;
+        }
+
+        if (segments <= 0) {
+            segments = DEFAULT_SEGMENTS;
         }
 
         RenderContext ctx = (RenderContext) context;
