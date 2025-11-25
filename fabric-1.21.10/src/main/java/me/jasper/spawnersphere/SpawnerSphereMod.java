@@ -54,7 +54,7 @@ public class SpawnerSphereMod implements ClientModInitializer {
             "key.spawnersphere.toggle",
             InputUtil.Type.KEYSYM,
             GLFW.GLFW_KEY_B,
-            "category.spawnersphere"
+            KeyBinding.Category.MISC
         ));
 
         // Register tick event for keybinding and periodic updates
