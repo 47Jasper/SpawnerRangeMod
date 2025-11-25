@@ -1,7 +1,6 @@
 package me.jasper.spawnersphere.platform;
 
 import me.jasper.spawnersphere.common.platform.IRenderer;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -108,13 +107,6 @@ public class FabricRenderer implements IRenderer {
         public RenderContext(MatrixStack matrices, VertexConsumerProvider vertexConsumers) {
             this.matrices = matrices;
             this.vertexConsumers = vertexConsumers;
-        }
-
-        /**
-         * Create from WorldRenderContext
-         */
-        public static RenderContext from(WorldRenderContext context) {
-            return new RenderContext(context.matrixStack(), context.consumers());
         }
     }
 }
