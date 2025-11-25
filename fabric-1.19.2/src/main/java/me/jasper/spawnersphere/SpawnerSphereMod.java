@@ -1,8 +1,8 @@
 package me.jasper.spawnersphere;
 
-import com.example.spawnersphere.common.SpawnerSphereCore;
-import com.example.spawnersphere.common.config.ConfigScreenFactory;
-import com.example.spawnersphere.common.config.ModConfig;
+import me.jasper.spawnersphere.common.SpawnerSphereCore;
+import me.jasper.spawnersphere.common.config.ConfigScreenFactory;
+import me.jasper.spawnersphere.common.config.ModConfig;
 import me.jasper.spawnersphere.config.ClothConfigScreen;
 import me.jasper.spawnersphere.platform.FabricPlatformHelper;
 import me.jasper.spawnersphere.platform.FabricRenderer;
@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
@@ -18,8 +19,10 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.glfw.GLFW;
 
+import java.io.File;
+
 /**
- * Fabric 1.21+ implementation using common architecture
+ * Fabric 1.19.x implementation using common architecture
  */
 public class SpawnerSphereMod implements ClientModInitializer {
 
@@ -30,6 +33,13 @@ public class SpawnerSphereMod implements ClientModInitializer {
     public void onInitializeClient() {
         // Initialize the common core with platform-specific implementations
         ModConfig config = new ModConfig();
+
+        // Set up config file location and load
+        File configDir = FabricLoader.getInstance().getConfigDir().toFile();
+        File configFile = new File(configDir, "spawner-sphere-mod.properties");
+        config.setConfigFile(configFile);
+        config.load();
+
         FabricPlatformHelper platformHelper = new FabricPlatformHelper();
         FabricRenderer renderer = new FabricRenderer();
 

@@ -9,10 +9,11 @@ import me.jasper.spawnersphere.platform.FabricRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3d;
@@ -28,8 +29,6 @@ public class SpawnerSphereMod implements ClientModInitializer {
 
     private static SpawnerSphereCore core;
     private static KeyBinding toggleKey;
-    private static final KeyBinding.Category SPAWNER_SPHERE_CATEGORY =
-        KeyBinding.Category.create("category.spawnersphere");
 
     @Override
     public void onInitializeClient() {
@@ -55,7 +54,7 @@ public class SpawnerSphereMod implements ClientModInitializer {
             "key.spawnersphere.toggle",
             InputUtil.Type.KEYSYM,
             GLFW.GLFW_KEY_B,
-            SPAWNER_SPHERE_CATEGORY
+            "category.spawnersphere"
         ));
 
         // Register tick event for keybinding and periodic updates
@@ -79,32 +78,37 @@ public class SpawnerSphereMod implements ClientModInitializer {
         }
     }
 
-    private void onRenderWorld(WorldRenderContext context) {
+    private void onRenderWorld(net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext context) {
         if (!core.isEnabled()) return;
 
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null || client.world == null) return;
 
-        // Null safety: Check consumers before rendering
-        if (context.consumers() == null) return;
-
-        // Prepare rendering context
+        // Get matrices and camera from context
         MatrixStack matrices = context.matrixStack();
-        Vec3d cameraPos = context.camera().getPos();
+        Camera camera = context.camera();
+        VertexConsumerProvider consumers = context.consumers();
+
+        // Null safety: Check consumers before rendering
+        if (consumers == null || matrices == null || camera == null) return;
+
+        Vec3d cameraPos = camera.getPos();
 
         matrices.push();
         matrices.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 
         // Create render context and delegate to core
         FabricRenderer.RenderContext renderContext =
-            FabricRenderer.RenderContext.from(context);
+            new FabricRenderer.RenderContext(matrices, consumers);
 
         core.render(renderContext, client.player, client.world);
 
         matrices.pop();
 
         // Force draw
-        context.consumers().draw();
+        if (consumers instanceof VertexConsumerProvider.Immediate) {
+            ((VertexConsumerProvider.Immediate) consumers).draw();
+        }
     }
 
     /**
