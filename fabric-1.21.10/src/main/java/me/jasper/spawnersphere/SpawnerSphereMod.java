@@ -114,6 +114,7 @@ public class SpawnerSphereMod implements ClientModInitializer {
     /**
      * Get the core instance (for testing or external access)
      */
+    @SuppressWarnings("unused")
     public static SpawnerSphereCore getCore() {
         return core;
     }
