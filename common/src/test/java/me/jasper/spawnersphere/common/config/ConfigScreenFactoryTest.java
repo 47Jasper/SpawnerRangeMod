@@ -2,96 +2,136 @@ package me.jasper.spawnersphere.common.config;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for ConfigScreenFactory
+ * Comprehensive tests for ConfigScreenFactory
  */
-public class ConfigScreenFactoryTest {
+class ConfigScreenFactoryTest {
 
     @BeforeEach
-    public void setUp() {
-        // Reset factory before each test
+    void setUp() {
+        // Clear any previously registered instance
         ConfigScreenFactory.register(null);
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         // Clean up after tests
         ConfigScreenFactory.register(null);
     }
 
-    @Test
-    public void testInitiallyNull() {
-        assertNull(ConfigScreenFactory.get());
-        assertFalse(ConfigScreenFactory.isAvailable());
+    @Nested
+    @DisplayName("register")
+    class RegisterTests {
+
+        @Test
+        @DisplayName("should register config screen successfully")
+        void shouldRegisterConfigScreenSuccessfully() {
+            IConfigScreen mockScreen = new TestConfigScreen(true);
+
+            ConfigScreenFactory.register(mockScreen);
+
+            assertSame(mockScreen, ConfigScreenFactory.get());
+        }
+
+        @Test
+        @DisplayName("should allow registering null")
+        void shouldAllowRegisteringNull() {
+            ConfigScreenFactory.register(new TestConfigScreen(true));
+            ConfigScreenFactory.register(null);
+
+            assertNull(ConfigScreenFactory.get());
+        }
+
+        @Test
+        @DisplayName("should replace previously registered screen")
+        void shouldReplacePreviousScreen() {
+            IConfigScreen screen1 = new TestConfigScreen(true);
+            IConfigScreen screen2 = new TestConfigScreen(false);
+
+            ConfigScreenFactory.register(screen1);
+            ConfigScreenFactory.register(screen2);
+
+            assertSame(screen2, ConfigScreenFactory.get());
+        }
     }
 
-    @Test
-    public void testRegisterAndGet() {
-        MockConfigScreen mockScreen = new MockConfigScreen(true);
-        ConfigScreenFactory.register(mockScreen);
+    @Nested
+    @DisplayName("get")
+    class GetTests {
 
-        assertEquals(mockScreen, ConfigScreenFactory.get());
+        @Test
+        @DisplayName("should return null when nothing registered")
+        void shouldReturnNullWhenNothingRegistered() {
+            assertNull(ConfigScreenFactory.get());
+        }
+
+        @Test
+        @DisplayName("should return registered screen")
+        void shouldReturnRegisteredScreen() {
+            IConfigScreen screen = new TestConfigScreen(true);
+            ConfigScreenFactory.register(screen);
+
+            IConfigScreen result = ConfigScreenFactory.get();
+
+            assertSame(screen, result);
+        }
     }
 
-    @Test
-    public void testIsAvailableWhenRegisteredAndAvailable() {
-        MockConfigScreen mockScreen = new MockConfigScreen(true);
-        ConfigScreenFactory.register(mockScreen);
+    @Nested
+    @DisplayName("isAvailable")
+    class IsAvailableTests {
 
-        assertTrue(ConfigScreenFactory.isAvailable());
+        @Test
+        @DisplayName("should return false when nothing registered")
+        void shouldReturnFalseWhenNothingRegistered() {
+            assertFalse(ConfigScreenFactory.isAvailable());
+        }
+
+        @Test
+        @DisplayName("should return false when registered screen is not available")
+        void shouldReturnFalseWhenScreenNotAvailable() {
+            ConfigScreenFactory.register(new TestConfigScreen(false));
+
+            assertFalse(ConfigScreenFactory.isAvailable());
+        }
+
+        @Test
+        @DisplayName("should return true when registered screen is available")
+        void shouldReturnTrueWhenScreenAvailable() {
+            ConfigScreenFactory.register(new TestConfigScreen(true));
+
+            assertTrue(ConfigScreenFactory.isAvailable());
+        }
+
+        @Test
+        @DisplayName("should return false after deregistering")
+        void shouldReturnFalseAfterDeregistering() {
+            ConfigScreenFactory.register(new TestConfigScreen(true));
+            ConfigScreenFactory.register(null);
+
+            assertFalse(ConfigScreenFactory.isAvailable());
+        }
     }
 
-    @Test
-    public void testIsAvailableWhenRegisteredButNotAvailable() {
-        MockConfigScreen mockScreen = new MockConfigScreen(false);
-        ConfigScreenFactory.register(mockScreen);
-
-        assertFalse(ConfigScreenFactory.isAvailable());
-    }
-
-    @Test
-    public void testRegisterOverwritesPrevious() {
-        MockConfigScreen firstScreen = new MockConfigScreen(true);
-        MockConfigScreen secondScreen = new MockConfigScreen(true);
-
-        ConfigScreenFactory.register(firstScreen);
-        assertEquals(firstScreen, ConfigScreenFactory.get());
-
-        ConfigScreenFactory.register(secondScreen);
-        assertEquals(secondScreen, ConfigScreenFactory.get());
-    }
-
-    @Test
-    public void testRegisterNull() {
-        MockConfigScreen mockScreen = new MockConfigScreen(true);
-        ConfigScreenFactory.register(mockScreen);
-
-        assertNotNull(ConfigScreenFactory.get());
-
-        ConfigScreenFactory.register(null);
-        assertNull(ConfigScreenFactory.get());
-        assertFalse(ConfigScreenFactory.isAvailable());
-    }
-
-    // Mock implementation
-    private static class MockConfigScreen implements IConfigScreen {
+    /**
+     * Test implementation of IConfigScreen
+     */
+    private static class TestConfigScreen implements IConfigScreen {
         private final boolean available;
-        Object lastParent;
-        int createCallCount = 0;
 
-        MockConfigScreen(boolean available) {
+        TestConfigScreen(boolean available) {
             this.available = available;
         }
 
         @Override
         public Object createConfigScreen(Object parent) {
-            this.lastParent = parent;
-            this.createCallCount++;
-            return new Object(); // Return dummy screen
+            return available ? new Object() : null;
         }
 
         @Override

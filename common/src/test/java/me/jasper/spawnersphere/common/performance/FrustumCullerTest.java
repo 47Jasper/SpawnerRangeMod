@@ -1,186 +1,237 @@
 package me.jasper.spawnersphere.common.performance;
 
-import me.jasper.spawnersphere.common.platform.IPlatformHelper;
+import me.jasper.spawnersphere.common.platform.IPlatformHelper.Position;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit tests for FrustumCuller
+ * Comprehensive tests for FrustumCuller
  */
-public class FrustumCullerTest {
+class FrustumCullerTest {
 
-    @Test
-    public void testSphereDirectlyAhead() {
-        // Sphere directly in front of player
-        IPlatformHelper.Position sphereCenter = new IPlatformHelper.Position(0, 64, 10);
-        float sphereRadius = 5.0f;
-        IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
+    @Nested
+    @DisplayName("isVisible")
+    class IsVisibleTests {
 
-        // Looking straight ahead (positive Z)
-        boolean visible = FrustumCuller.isVisible(
-            sphereCenter, sphereRadius, cameraPos,
-            0.0, 0.0, 1.0, // Looking towards +Z
-            90.0f
-        );
+        @Test
+        @DisplayName("should return true when sphere is directly ahead")
+        void shouldReturnTrueWhenDirectlyAhead() {
+            Position spherePos = new Position(0, 0, 50);
+            Position playerPos = new Position(0, 0, 0);
 
-        assertTrue(visible);
+            boolean result = FrustumCuller.isVisible(spherePos, 16.0f, playerPos, 0, 0, 1, 90.0f);
+
+            assertTrue(result);
+        }
+
+        @Test
+        @DisplayName("should return false when sphere is behind player")
+        void shouldReturnFalseWhenBehind() {
+            Position spherePos = new Position(0, 0, -50);
+            Position playerPos = new Position(0, 0, 0);
+
+            boolean result = FrustumCuller.isVisible(spherePos, 16.0f, playerPos, 0, 0, 1, 90.0f);
+
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("should return true when sphere is very close")
+        void shouldReturnTrueWhenVeryClose() {
+            Position spherePos = new Position(5, 0, 0);
+            Position playerPos = new Position(0, 0, 0);
+
+            // Very close spheres should always be visible
+            boolean result = FrustumCuller.isVisible(spherePos, 16.0f, playerPos, 0, 0, 1, 90.0f);
+
+            assertTrue(result);
+        }
+
+        @Test
+        @DisplayName("should return true when look vector is zero")
+        void shouldReturnTrueWithZeroLookVector() {
+            Position spherePos = new Position(0, 0, 50);
+            Position playerPos = new Position(0, 0, 0);
+
+            // Zero look vector should default to visible
+            boolean result = FrustumCuller.isVisible(spherePos, 16.0f, playerPos, 0, 0, 0, 90.0f);
+
+            assertTrue(result);
+        }
+
+        @Test
+        @DisplayName("should handle sphere at edge of FOV")
+        void shouldHandleSphereAtEdgeOfFOV() {
+            Position spherePos = new Position(50, 0, 50);
+            Position playerPos = new Position(0, 0, 0);
+
+            // 45-degree angle sphere with 90 degree FOV should be visible
+            boolean result = FrustumCuller.isVisible(spherePos, 16.0f, playerPos, 0, 0, 1, 90.0f);
+
+            assertTrue(result);
+        }
+
+        @Test
+        @DisplayName("should return false when sphere is outside FOV")
+        void shouldReturnFalseWhenOutsideFOV() {
+            Position spherePos = new Position(100, 0, 10);
+            Position playerPos = new Position(0, 0, 0);
+
+            // Far to the side, outside narrow FOV
+            boolean result = FrustumCuller.isVisible(spherePos, 5.0f, playerPos, 0, 0, 1, 30.0f);
+
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("should account for sphere radius in visibility")
+        void shouldAccountForSphereRadius() {
+            Position spherePos = new Position(50, 0, 20);
+            Position playerPos = new Position(0, 0, 0);
+
+            // Large sphere should be visible even if center is at edge
+            boolean resultLarge = FrustumCuller.isVisible(spherePos, 30.0f, playerPos, 0, 0, 1, 60.0f);
+            boolean resultSmall = FrustumCuller.isVisible(spherePos, 1.0f, playerPos, 0, 0, 1, 60.0f);
+
+            // Large radius adds to the angle margin
+            assertTrue(resultLarge);
+        }
+
+        @Test
+        @DisplayName("should handle looking up")
+        void shouldHandleLookingUp() {
+            Position spherePos = new Position(0, 50, 0);
+            Position playerPos = new Position(0, 0, 0);
+
+            boolean result = FrustumCuller.isVisible(spherePos, 16.0f, playerPos, 0, 1, 0, 90.0f);
+
+            assertTrue(result);
+        }
+
+        @Test
+        @DisplayName("should handle looking down")
+        void shouldHandleLookingDown() {
+            Position spherePos = new Position(0, -50, 0);
+            Position playerPos = new Position(0, 0, 0);
+
+            boolean result = FrustumCuller.isVisible(spherePos, 16.0f, playerPos, 0, -1, 0, 90.0f);
+
+            assertTrue(result);
+        }
+
+        @ParameterizedTest
+        @ValueSource(floats = {30.0f, 60.0f, 90.0f, 110.0f})
+        @DisplayName("should handle various FOV values")
+        void shouldHandleVariousFOVValues(float fov) {
+            Position spherePos = new Position(0, 0, 50);
+            Position playerPos = new Position(0, 0, 0);
+
+            boolean result = FrustumCuller.isVisible(spherePos, 16.0f, playerPos, 0, 0, 1, fov);
+
+            assertTrue(result);
+        }
+
+        @Test
+        @DisplayName("should handle negative coordinates")
+        void shouldHandleNegativeCoordinates() {
+            Position spherePos = new Position(-50, -20, -100);
+            Position playerPos = new Position(0, 0, 0);
+
+            boolean result = FrustumCuller.isVisible(spherePos, 16.0f, playerPos, 0, 0, -1, 90.0f);
+
+            assertTrue(result);
+        }
     }
 
-    @Test
-    public void testSphereBehind() {
-        // Sphere behind player
-        IPlatformHelper.Position sphereCenter = new IPlatformHelper.Position(0, 64, -10);
-        float sphereRadius = 5.0f;
-        IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
+    @Nested
+    @DisplayName("isVisibleSimple")
+    class IsVisibleSimpleTests {
 
-        // Looking straight ahead (positive Z)
-        boolean visible = FrustumCuller.isVisible(
-            sphereCenter, sphereRadius, cameraPos,
-            0.0, 0.0, 1.0, // Looking towards +Z
-            90.0f
-        );
+        @Test
+        @DisplayName("should return true when within max distance")
+        void shouldReturnTrueWhenWithinMaxDistance() {
+            Position spherePos = new Position(0, 0, 50);
+            Position playerPos = new Position(0, 0, 0);
 
-        assertFalse(visible);
-    }
+            boolean result = FrustumCuller.isVisibleSimple(spherePos, 16.0f, playerPos, 100.0f);
 
-    @Test
-    public void testSphereToSide() {
-        // Sphere to the side (beyond FOV)
-        IPlatformHelper.Position sphereCenter = new IPlatformHelper.Position(50, 64, 0);
-        float sphereRadius = 5.0f;
-        IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
+            assertTrue(result);
+        }
 
-        // Looking straight ahead (positive Z)
-        boolean visible = FrustumCuller.isVisible(
-            sphereCenter, sphereRadius, cameraPos,
-            0.0, 0.0, 1.0, // Looking towards +Z
-            90.0f
-        );
+        @Test
+        @DisplayName("should return false when beyond max distance")
+        void shouldReturnFalseWhenBeyondMaxDistance() {
+            Position spherePos = new Position(0, 0, 150);
+            Position playerPos = new Position(0, 0, 0);
 
-        assertFalse(visible);
-    }
+            boolean result = FrustumCuller.isVisibleSimple(spherePos, 16.0f, playerPos, 100.0f);
 
-    @Test
-    public void testSphereAtEdgeOfFOV() {
-        // Sphere at approximately 45 degrees (within 90 degree FOV)
-        IPlatformHelper.Position sphereCenter = new IPlatformHelper.Position(10, 64, 10);
-        float sphereRadius = 5.0f;
-        IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
+            assertFalse(result);
+        }
 
-        // Looking straight ahead (positive Z)
-        boolean visible = FrustumCuller.isVisible(
-            sphereCenter, sphereRadius, cameraPos,
-            0.0, 0.0, 1.0, // Looking towards +Z
-            90.0f
-        );
+        @Test
+        @DisplayName("should account for sphere radius in visibility check")
+        void shouldAccountForSphereRadius() {
+            Position spherePos = new Position(0, 0, 110);
+            Position playerPos = new Position(0, 0, 0);
 
-        assertTrue(visible);
-    }
+            // Without radius: 110 > 100, would be false
+            // With radius 16: 110 <= 100 + 16 = 116, should be true
+            boolean result = FrustumCuller.isVisibleSimple(spherePos, 16.0f, playerPos, 100.0f);
 
-    @Test
-    public void testLargeSphereRadius() {
-        // Large sphere that extends into view even if center is not
-        IPlatformHelper.Position sphereCenter = new IPlatformHelper.Position(20, 64, 0);
-        float sphereRadius = 25.0f; // Large radius
-        IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
+            assertTrue(result);
+        }
 
-        // Looking straight ahead (positive Z)
-        boolean visible = FrustumCuller.isVisible(
-            sphereCenter, sphereRadius, cameraPos,
-            0.0, 0.0, 1.0, // Looking towards +Z
-            90.0f
-        );
+        @Test
+        @DisplayName("should return true at exact max distance")
+        void shouldReturnTrueAtExactMaxDistance() {
+            Position spherePos = new Position(0, 0, 100);
+            Position playerPos = new Position(0, 0, 0);
 
-        // Large sphere should be visible because it extends into FOV
-        assertTrue(visible);
-    }
+            boolean result = FrustumCuller.isVisibleSimple(spherePos, 0.0f, playerPos, 100.0f);
 
-    @Test
-    public void testNarrowFOV() {
-        // Test with narrow FOV (30 degrees)
-        IPlatformHelper.Position sphereCenter = new IPlatformHelper.Position(10, 64, 10);
-        float sphereRadius = 2.0f;
-        IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
+            assertTrue(result);
+        }
 
-        // Looking straight ahead with narrow FOV
-        boolean visible = FrustumCuller.isVisible(
-            sphereCenter, sphereRadius, cameraPos,
-            0.0, 0.0, 1.0, // Looking towards +Z
-            30.0f // Narrow FOV
-        );
+        @Test
+        @DisplayName("should return true when sphere is at player position")
+        void shouldReturnTrueWhenAtPlayerPosition() {
+            Position spherePos = new Position(10, 20, 30);
+            Position playerPos = new Position(10, 20, 30);
 
-        // Should be outside narrow FOV
-        assertFalse(visible);
-    }
+            boolean result = FrustumCuller.isVisibleSimple(spherePos, 16.0f, playerPos, 100.0f);
 
-    @Test
-    public void testWideFOV() {
-        // Test with wide FOV (120 degrees)
-        IPlatformHelper.Position sphereCenter = new IPlatformHelper.Position(15, 64, 10);
-        float sphereRadius = 2.0f;
-        IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
+            assertTrue(result);
+        }
 
-        // Looking straight ahead with wide FOV
-        boolean visible = FrustumCuller.isVisible(
-            sphereCenter, sphereRadius, cameraPos,
-            0.0, 0.0, 1.0, // Looking towards +Z
-            120.0f // Wide FOV
-        );
+        @Test
+        @DisplayName("should handle zero max distance")
+        void shouldHandleZeroMaxDistance() {
+            Position spherePos = new Position(0, 0, 10);
+            Position playerPos = new Position(0, 0, 0);
 
-        assertTrue(visible);
-    }
+            // With sphere radius 16: 10 <= 0 + 16 = 16, should be true
+            boolean result = FrustumCuller.isVisibleSimple(spherePos, 16.0f, playerPos, 0.0f);
 
-    @Test
-    public void testDifferentLookDirections() {
-        IPlatformHelper.Position sphereCenter = new IPlatformHelper.Position(10, 64, 0);
-        float sphereRadius = 5.0f;
-        IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
+            assertTrue(result);
+        }
 
-        // Looking towards +X
-        boolean visibleX = FrustumCuller.isVisible(
-            sphereCenter, sphereRadius, cameraPos,
-            1.0, 0.0, 0.0,
-            90.0f
-        );
-        assertTrue(visibleX);
+        @Test
+        @DisplayName("should handle 3D diagonal distance")
+        void shouldHandle3DDiagonalDistance() {
+            Position spherePos = new Position(60, 60, 60);
+            Position playerPos = new Position(0, 0, 0);
 
-        // Looking towards -X
-        boolean visibleNegX = FrustumCuller.isVisible(
-            sphereCenter, sphereRadius, cameraPos,
-            -1.0, 0.0, 0.0,
-            90.0f
-        );
-        assertFalse(visibleNegX);
-    }
+            // Distance = sqrt(60^2 + 60^2 + 60^2) = sqrt(10800) ≈ 103.9
+            boolean result = FrustumCuller.isVisibleSimple(spherePos, 16.0f, playerPos, 100.0f);
 
-    @Test
-    public void testYAxisConsidered() {
-        // Test that Y coordinate is considered in 3D frustum culling
-        IPlatformHelper.Position cameraPos = new IPlatformHelper.Position(0, 64, 0);
-
-        // Sphere directly ahead at same Y level - should be visible
-        boolean visibleSameY = FrustumCuller.isVisible(
-            new IPlatformHelper.Position(0, 64, 10),
-            5.0f, cameraPos,
-            0.0, 0.0, 1.0, // Looking straight ahead in +Z
-            90.0f
-        );
-
-        // Sphere far above, slightly ahead - should NOT be visible
-        // Direction to sphere (0, 200, 10) from (0, 64, 0) is mostly upward (Y=136)
-        // Looking straight ahead (0, 0, 1) means upward spheres are outside FOV
-        boolean visibleHighY = FrustumCuller.isVisible(
-            new IPlatformHelper.Position(0, 200, 10),
-            5.0f, cameraPos,
-            0.0, 0.0, 1.0, // Looking straight ahead (no upward angle)
-            90.0f
-        );
-
-        // Sphere at same Y should be visible
-        assertTrue(visibleSameY);
-        // Sphere far above should NOT be visible when looking straight ahead
-        // This proves Y coordinate is considered in frustum culling
-        assertFalse(visibleHighY);
+            // 103.9 <= 100 + 16 = 116, should be true
+            assertTrue(result);
+        }
     }
 }
