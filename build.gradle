@@ -43,7 +43,7 @@ allprojects {
 subprojects {
     afterEvaluate {
         dependencies {
-            implementation 'org.joml:joml:1.10.5'
+            implementation 'org.joml:joml:1.10.8'
         }
         if (!plugins.hasPlugin('fabric-loom')) {
             tasks.withType(JavaCompile) {
