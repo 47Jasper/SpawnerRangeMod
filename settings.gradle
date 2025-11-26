@@ -19,10 +19,8 @@ pluginManagement {
         gradlePluginPortal()
         mavenCentral()
     }
-    plugins {
-        // Use Loom 1.11-SNAPSHOT (previously working)
-        id 'fabric-loom' version '1.11-SNAPSHOT'
-    }
+    // Plugin versions are explicitly specified in each subproject's build.gradle
+    // to avoid classloader conflicts between different Loom versions
 }
 
 rootProject.name = 'spawner-sphere-mod'

@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom'
+    id 'fabric-loom' version '1.11-SNAPSHOT'
 }
 
 // Minecraft 1.21.10 requires Java 21
