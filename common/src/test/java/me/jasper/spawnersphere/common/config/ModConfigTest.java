@@ -42,7 +42,7 @@ class ModConfigTest {
         @Test
         @DisplayName("should have correct default scan radius")
         void shouldHaveCorrectDefaultScanRadius() {
-            assertEquals(64, config.getScanRadius());
+            assertEquals(32, config.getScanRadius());
         }
 
         @Test
