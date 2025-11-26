@@ -40,6 +40,8 @@ class SpawnerSphereCoreTest {
     @BeforeEach
     void setUp() {
         config = new ModConfig();
+        // Use small scan radius to avoid OOM in tests (default 64 = ~1.1M iterations)
+        config.setScanRadius(16);
         core = new SpawnerSphereCore(mockPlatformHelper, mockRenderer, config);
     }
 
