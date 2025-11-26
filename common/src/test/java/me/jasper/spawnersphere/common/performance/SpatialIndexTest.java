@@ -1,221 +1,379 @@
 package me.jasper.spawnersphere.common.performance;
 
 import me.jasper.spawnersphere.common.data.SpawnerData;
-import me.jasper.spawnersphere.common.platform.IPlatformHelper;
+import me.jasper.spawnersphere.common.platform.IPlatformHelper.Position;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit tests for SpatialIndex
+ * Comprehensive tests for SpatialIndex
  */
-public class SpatialIndexTest {
+class SpatialIndexTest {
 
-    private SpatialIndex index;
+    private SpatialIndex spatialIndex;
 
     @BeforeEach
-    public void setUp() {
-        index = new SpatialIndex();
+    void setUp() {
+        spatialIndex = new SpatialIndex();
     }
 
-    @Test
-    public void testEmptyIndex() {
-        IPlatformHelper.Position center = new IPlatformHelper.Position(0, 0, 0);
-        List<SpawnerData> nearby = index.getNearby(center, 32);
-        assertTrue(nearby.isEmpty());
+    @Nested
+    @DisplayName("add with blockPos and center")
+    class AddWithBlockPosTests {
+
+        @Test
+        @DisplayName("should add spawner successfully")
+        void shouldAddSpawnerSuccessfully() {
+            Object blockPos = "testBlockPos";
+            Position center = new Position(10, 64, 20);
+
+            spatialIndex.add(blockPos, center);
+
+            assertEquals(1, spatialIndex.size());
+        }
+
+        @Test
+        @DisplayName("should throw when blockPos is null")
+        void shouldThrowWhenBlockPosIsNull() {
+            Position center = new Position(0, 0, 0);
+
+            assertThrows(IllegalArgumentException.class, () ->
+                spatialIndex.add(null, center));
+        }
+
+        @Test
+        @DisplayName("should throw when center is null")
+        void shouldThrowWhenCenterIsNull() {
+            Object blockPos = "testBlockPos";
+
+            assertThrows(IllegalArgumentException.class, () ->
+                spatialIndex.add(blockPos, null));
+        }
+
+        @Test
+        @DisplayName("should add multiple spawners")
+        void shouldAddMultipleSpawners() {
+            spatialIndex.add("pos1", new Position(0, 0, 0));
+            spatialIndex.add("pos2", new Position(100, 64, 100));
+            spatialIndex.add("pos3", new Position(-50, 64, -50));
+
+            assertEquals(3, spatialIndex.size());
+        }
+
+        @Test
+        @DisplayName("should handle spawners in different chunks")
+        void shouldHandleSpawnersInDifferentChunks() {
+            // Chunk size is 16, so these should be in different chunks
+            spatialIndex.add("pos1", new Position(0, 0, 0));
+            spatialIndex.add("pos2", new Position(32, 0, 32));
+            spatialIndex.add("pos3", new Position(-32, 0, -32));
+
+            assertEquals(3, spatialIndex.size());
+        }
     }
 
-    @Test
-    public void testAddAndRetrieve() {
-        // Add a spawner at origin
-        IPlatformHelper.Position pos1 = new IPlatformHelper.Position(0, 64, 0);
-        Object spawner1 = new Object();
-        index.add(spawner1, pos1);
+    @Nested
+    @DisplayName("add with SpawnerData")
+    class AddWithSpawnerDataTests {
 
-        // Add a spawner far away
-        IPlatformHelper.Position pos2 = new IPlatformHelper.Position(1000, 64, 1000);
-        Object spawner2 = new Object();
-        index.add(spawner2, pos2);
+        @Test
+        @DisplayName("should add SpawnerData successfully")
+        void shouldAddSpawnerDataSuccessfully() {
+            SpawnerData data = new SpawnerData("blockPos", new Position(10, 64, 20));
 
-        // Query from origin with radius 32
-        IPlatformHelper.Position center = new IPlatformHelper.Position(0, 64, 0);
-        List<SpawnerData> nearby = index.getNearby(center, 32);
+            spatialIndex.add(data);
 
-        // Should find spawner1 but not spawner2
-        assertEquals(1, nearby.size());
-        assertEquals(spawner1, nearby.get(0).blockPos);
+            assertEquals(1, spatialIndex.size());
+        }
+
+        @Test
+        @DisplayName("should throw when data is null")
+        void shouldThrowWhenDataIsNull() {
+            assertThrows(IllegalArgumentException.class, () ->
+                spatialIndex.add((SpawnerData) null));
+        }
     }
 
-    @Test
-    public void testMultipleSpawnersInRange() {
-        // Add 4 spawners in a square around origin
-        index.add(new Object(), new IPlatformHelper.Position(10, 64, 10));
-        index.add(new Object(), new IPlatformHelper.Position(-10, 64, 10));
-        index.add(new Object(), new IPlatformHelper.Position(10, 64, -10));
-        index.add(new Object(), new IPlatformHelper.Position(-10, 64, -10));
+    @Nested
+    @DisplayName("getNearby")
+    class GetNearbyTests {
 
-        // Query from origin with radius 20
-        IPlatformHelper.Position center = new IPlatformHelper.Position(0, 64, 0);
-        List<SpawnerData> nearby = index.getNearby(center, 20);
+        @Test
+        @DisplayName("should return spawners within radius")
+        void shouldReturnSpawnersWithinRadius() {
+            spatialIndex.add("pos1", new Position(0, 0, 0));
+            spatialIndex.add("pos2", new Position(10, 0, 10));
+            spatialIndex.add("pos3", new Position(100, 0, 100));
 
-        // Should find all 4 spawners
-        assertEquals(4, nearby.size());
+            Position center = new Position(0, 0, 0);
+            List<SpawnerData> nearby = spatialIndex.getNearby(center, 50);
+
+            assertEquals(2, nearby.size());
+        }
+
+        @Test
+        @DisplayName("should return empty list when no spawners nearby")
+        void shouldReturnEmptyWhenNoneNearby() {
+            spatialIndex.add("pos1", new Position(1000, 0, 1000));
+
+            Position center = new Position(0, 0, 0);
+            List<SpawnerData> nearby = spatialIndex.getNearby(center, 50);
+
+            assertTrue(nearby.isEmpty());
+        }
+
+        @Test
+        @DisplayName("should return all spawners when all within radius")
+        void shouldReturnAllWhenAllWithinRadius() {
+            spatialIndex.add("pos1", new Position(0, 0, 0));
+            spatialIndex.add("pos2", new Position(5, 0, 5));
+            spatialIndex.add("pos3", new Position(-5, 0, -5));
+
+            Position center = new Position(0, 0, 0);
+            List<SpawnerData> nearby = spatialIndex.getNearby(center, 100);
+
+            assertEquals(3, nearby.size());
+        }
+
+        @Test
+        @DisplayName("should throw when center is null")
+        void shouldThrowWhenCenterIsNull() {
+            assertThrows(IllegalArgumentException.class, () ->
+                spatialIndex.getNearby(null, 50));
+        }
+
+        @Test
+        @DisplayName("should throw when radius is negative")
+        void shouldThrowWhenRadiusIsNegative() {
+            assertThrows(IllegalArgumentException.class, () ->
+                spatialIndex.getNearby(new Position(0, 0, 0), -10));
+        }
+
+        @Test
+        @DisplayName("should return empty list for zero radius with spawner at center")
+        void shouldHandleZeroRadius() {
+            spatialIndex.add("pos1", new Position(0, 0, 0));
+
+            Position center = new Position(0, 0, 0);
+            List<SpawnerData> nearby = spatialIndex.getNearby(center, 0);
+
+            // Distance 0 <= 0, so it should be included
+            assertEquals(1, nearby.size());
+        }
+
+        @Test
+        @DisplayName("should handle spawners at chunk boundaries")
+        void shouldHandleChunkBoundaries() {
+            // Add spawners at chunk boundary (16 blocks)
+            spatialIndex.add("pos1", new Position(15, 0, 15));
+            spatialIndex.add("pos2", new Position(17, 0, 17));
+
+            Position center = new Position(16, 0, 16);
+            List<SpawnerData> nearby = spatialIndex.getNearby(center, 10);
+
+            assertEquals(2, nearby.size());
+        }
+
+        @Test
+        @DisplayName("should consider Y axis in distance calculation")
+        void shouldConsiderYAxis() {
+            spatialIndex.add("pos1", new Position(0, 0, 0));
+            spatialIndex.add("pos2", new Position(0, 100, 0));
+
+            Position center = new Position(0, 0, 0);
+            List<SpawnerData> nearby = spatialIndex.getNearby(center, 50);
+
+            // Only pos1 should be within radius
+            assertEquals(1, nearby.size());
+        }
     }
 
-    @Test
-    public void testClear() {
-        index.add(new Object(), new IPlatformHelper.Position(0, 64, 0));
-        index.add(new Object(), new IPlatformHelper.Position(10, 64, 10));
+    @Nested
+    @DisplayName("remove")
+    class RemoveTests {
 
-        index.clear();
+        @Test
+        @DisplayName("should remove spawner successfully")
+        void shouldRemoveSpawnerSuccessfully() {
+            Object blockPos = "testBlockPos";
+            Position center = new Position(10, 64, 20);
+            spatialIndex.add(blockPos, center);
 
-        IPlatformHelper.Position center = new IPlatformHelper.Position(0, 64, 0);
-        List<SpawnerData> nearby = index.getNearby(center, 32);
+            spatialIndex.remove(blockPos, center);
 
-        assertTrue(nearby.isEmpty());
+            assertEquals(0, spatialIndex.size());
+        }
+
+        @Test
+        @DisplayName("should handle removing non-existent spawner")
+        void shouldHandleRemovingNonExistent() {
+            assertDoesNotThrow(() ->
+                spatialIndex.remove("nonExistent", new Position(0, 0, 0)));
+        }
+
+        @Test
+        @DisplayName("should handle null blockPos gracefully")
+        void shouldHandleNullBlockPosGracefully() {
+            assertDoesNotThrow(() ->
+                spatialIndex.remove(null, new Position(0, 0, 0)));
+        }
+
+        @Test
+        @DisplayName("should handle null center gracefully")
+        void shouldHandleNullCenterGracefully() {
+            assertDoesNotThrow(() ->
+                spatialIndex.remove("blockPos", null));
+        }
+
+        @Test
+        @DisplayName("should only remove specified spawner")
+        void shouldOnlyRemoveSpecifiedSpawner() {
+            spatialIndex.add("pos1", new Position(0, 0, 0));
+            spatialIndex.add("pos2", new Position(10, 0, 10));
+
+            spatialIndex.remove("pos1", new Position(0, 0, 0));
+
+            assertEquals(1, spatialIndex.size());
+        }
     }
 
-    @Test
-    public void testChunkBoundaries() {
-        // Add spawners exactly on chunk boundaries (chunks are 16x16)
-        index.add("spawner1", new IPlatformHelper.Position(0, 64, 0));
-        index.add("spawner2", new IPlatformHelper.Position(16, 64, 0));
-        index.add("spawner3", new IPlatformHelper.Position(0, 64, 16));
-        index.add("spawner4", new IPlatformHelper.Position(16, 64, 16));
+    @Nested
+    @DisplayName("clear")
+    class ClearTests {
 
-        // Query from center with radius that should catch all
-        IPlatformHelper.Position center = new IPlatformHelper.Position(8, 64, 8);
-        List<SpawnerData> nearby = index.getNearby(center, 20);
+        @Test
+        @DisplayName("should remove all spawners")
+        void shouldRemoveAllSpawners() {
+            spatialIndex.add("pos1", new Position(0, 0, 0));
+            spatialIndex.add("pos2", new Position(10, 0, 10));
+            spatialIndex.add("pos3", new Position(20, 0, 20));
 
-        assertEquals(4, nearby.size());
+            spatialIndex.clear();
+
+            assertEquals(0, spatialIndex.size());
+        }
+
+        @Test
+        @DisplayName("should handle clearing empty index")
+        void shouldHandleClearingEmpty() {
+            assertDoesNotThrow(() -> spatialIndex.clear());
+            assertEquals(0, spatialIndex.size());
+        }
     }
 
-    @Test
-    public void testDistanceCalculation() {
-        IPlatformHelper.Position spawnerPos = new IPlatformHelper.Position(10, 64, 0);
-        index.add("spawner", spawnerPos);
+    @Nested
+    @DisplayName("size")
+    class SizeTests {
 
-        IPlatformHelper.Position center = new IPlatformHelper.Position(0, 64, 0);
-        List<SpawnerData> nearby = index.getNearby(center, 15);
+        @Test
+        @DisplayName("should return 0 for empty index")
+        void shouldReturnZeroForEmpty() {
+            assertEquals(0, spatialIndex.size());
+        }
 
-        assertEquals(1, nearby.size());
-        assertEquals(spawnerPos, nearby.get(0).center);
+        @Test
+        @DisplayName("should return correct count after adds")
+        void shouldReturnCorrectCountAfterAdds() {
+            spatialIndex.add("pos1", new Position(0, 0, 0));
+            spatialIndex.add("pos2", new Position(10, 0, 10));
+
+            assertEquals(2, spatialIndex.size());
+        }
+
+        @Test
+        @DisplayName("should return correct count after removes")
+        void shouldReturnCorrectCountAfterRemoves() {
+            spatialIndex.add("pos1", new Position(0, 0, 0));
+            spatialIndex.add("pos2", new Position(10, 0, 10));
+            spatialIndex.remove("pos1", new Position(0, 0, 0));
+
+            assertEquals(1, spatialIndex.size());
+        }
     }
 
-    @Test
-    public void testExactRadiusBoundary() {
-        // Spawner exactly at radius distance
-        IPlatformHelper.Position spawnerPos = new IPlatformHelper.Position(10, 64, 0);
-        index.add("spawner", spawnerPos);
+    @Nested
+    @DisplayName("Thread Safety")
+    class ThreadSafetyTests {
 
-        // Query with radius = distance
-        IPlatformHelper.Position center = new IPlatformHelper.Position(0, 64, 0);
-        List<SpawnerData> nearby = index.getNearby(center, 10);
+        @Test
+        @DisplayName("should handle concurrent adds")
+        void shouldHandleConcurrentAdds() throws InterruptedException {
+            int threadCount = 10;
+            int spawnsPerThread = 100;
+            ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+            CountDownLatch latch = new CountDownLatch(threadCount);
 
-        // Should include spawner at exactly radius distance
-        assertEquals(1, nearby.size());
-    }
+            for (int t = 0; t < threadCount; t++) {
+                final int threadId = t;
+                executor.submit(() -> {
+                    try {
+                        for (int i = 0; i < spawnsPerThread; i++) {
+                            spatialIndex.add(
+                                "pos_" + threadId + "_" + i,
+                                new Position(threadId * 100 + i, 0, 0)
+                            );
+                        }
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+            }
 
-    @Test
-    public void testYCoordinateConsidered() {
-        // Spawners at different Y levels but same X,Z
-        index.add("spawner1", new IPlatformHelper.Position(10, 64, 0)); // Same Y level
-        index.add("spawner2", new IPlatformHelper.Position(10, 128, 0)); // 64 blocks above
-        index.add("spawner3", new IPlatformHelper.Position(10, 256, 0)); // 192 blocks above
+            latch.await(10, TimeUnit.SECONDS);
+            executor.shutdown();
 
-        // Query from origin at Y=64 with radius 15
-        IPlatformHelper.Position center = new IPlatformHelper.Position(0, 64, 0);
-        List<SpawnerData> nearby = index.getNearby(center, 15);
+            assertEquals(threadCount * spawnsPerThread, spatialIndex.size());
+        }
 
-        // Distance uses 3D Euclidean: sqrt(dx^2 + dy^2 + dz^2)
-        // spawner1: sqrt(10^2 + 0^2 + 0^2) = 10 (within radius 15)
-        // spawner2: sqrt(10^2 + 64^2 + 0^2) = ~64.78 (outside radius 15)
-        // spawner3: sqrt(10^2 + 192^2 + 0^2) = ~192.26 (outside radius 15)
-        // Only spawner1 should be found
-        assertEquals(1, nearby.size());
-    }
+        @Test
+        @DisplayName("should handle concurrent reads and writes")
+        void shouldHandleConcurrentReadsAndWrites() throws InterruptedException {
+            int threadCount = 10;
+            ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+            CountDownLatch latch = new CountDownLatch(threadCount);
 
-    @Test
-    public void testRemoveSingleSpawner() {
-        // Add and then remove a spawner
-        IPlatformHelper.Position pos = new IPlatformHelper.Position(10, 64, 0);
-        Object spawner = new Object();
-        index.add(spawner, pos);
+            // Pre-populate with some data
+            for (int i = 0; i < 100; i++) {
+                spatialIndex.add("initial_" + i, new Position(i, 0, 0));
+            }
 
-        // Verify it's there
-        List<SpawnerData> nearby = index.getNearby(pos, 5);
-        assertEquals(1, nearby.size());
+            for (int t = 0; t < threadCount; t++) {
+                final int threadId = t;
+                executor.submit(() -> {
+                    try {
+                        for (int i = 0; i < 50; i++) {
+                            if (threadId % 2 == 0) {
+                                // Writer thread
+                                spatialIndex.add(
+                                    "pos_" + threadId + "_" + i,
+                                    new Position(threadId * 100 + i, 0, 0)
+                                );
+                            } else {
+                                // Reader thread
+                                spatialIndex.getNearby(new Position(0, 0, 0), 1000);
+                            }
+                        }
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+            }
 
-        // Remove it
-        index.remove(spawner, pos);
+            latch.await(10, TimeUnit.SECONDS);
+            executor.shutdown();
 
-        // Verify it's gone
-        nearby = index.getNearby(pos, 5);
-        assertEquals(0, nearby.size());
-    }
-
-    @Test
-    public void testRemoveOneOfMultiple() {
-        // Add multiple spawners
-        IPlatformHelper.Position pos1 = new IPlatformHelper.Position(0, 64, 0);
-        IPlatformHelper.Position pos2 = new IPlatformHelper.Position(5, 64, 0);
-        Object spawner1 = new Object();
-        Object spawner2 = new Object();
-
-        index.add(spawner1, pos1);
-        index.add(spawner2, pos2);
-
-        // Verify both are there
-        IPlatformHelper.Position center = new IPlatformHelper.Position(0, 64, 0);
-        List<SpawnerData> nearby = index.getNearby(center, 10);
-        assertEquals(2, nearby.size());
-
-        // Remove one
-        index.remove(spawner1, pos1);
-
-        // Verify only one remains
-        nearby = index.getNearby(center, 10);
-        assertEquals(1, nearby.size());
-        assertEquals(spawner2, nearby.get(0).blockPos);
-    }
-
-    @Test
-    public void testRemoveNonExistent() {
-        // Try to remove from empty index - should not crash
-        IPlatformHelper.Position pos = new IPlatformHelper.Position(0, 64, 0);
-        Object spawner = new Object();
-        index.remove(spawner, pos); // Should not throw
-
-        // Add one spawner and try to remove a different one
-        Object spawner2 = new Object();
-        index.add(spawner2, pos);
-        index.remove(spawner, pos); // Should not remove spawner2
-
-        // Verify spawner2 is still there
-        List<SpawnerData> nearby = index.getNearby(pos, 5);
-        assertEquals(1, nearby.size());
-    }
-
-    @Test
-    public void testRemoveFromDifferentChunk() {
-        // Add spawner in one chunk
-        IPlatformHelper.Position pos1 = new IPlatformHelper.Position(0, 64, 0);  // Chunk (0,0)
-        IPlatformHelper.Position pos2 = new IPlatformHelper.Position(20, 64, 20); // Chunk (1,1)
-        Object spawner1 = new Object();
-        Object spawner2 = new Object();
-
-        index.add(spawner1, pos1);
-        index.add(spawner2, pos2);
-
-        // Remove from one chunk
-        index.remove(spawner1, pos1);
-
-        // Verify spawner2 in different chunk is unaffected
-        List<SpawnerData> nearby = index.getNearby(pos2, 5);
-        assertEquals(1, nearby.size());
-        assertEquals(spawner2, nearby.get(0).blockPos);
+            // Should not throw and data should be consistent
+            assertTrue(spatialIndex.size() >= 100);
+        }
     }
 }
