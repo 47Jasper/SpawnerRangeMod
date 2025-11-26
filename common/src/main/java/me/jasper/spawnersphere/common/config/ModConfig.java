@@ -15,7 +15,7 @@ public class ModConfig {
 
     // Sphere rendering
     private int sphereRadius = 16;
-    private int scanRadius = 64;
+    private int scanRadius = 32;
     private long scanInterval = 60000; // milliseconds (60 seconds)
 
     // Colors (RGB 0-255)
@@ -332,7 +332,7 @@ public class ModConfig {
      */
     private void resetToDefaults() {
         sphereRadius = 16;
-        scanRadius = 64;
+        scanRadius = 32;
         scanInterval = 60000;
         outsideRangeColor = new ColorConfig(128, 255, 0, 51);
         insideRangeColor = new ColorConfig(255, 128, 0, 102);
