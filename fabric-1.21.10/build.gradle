@@ -23,6 +23,16 @@ dependencies {
         exclude group: "net.fabricmc.fabric-api"
     }
     modImplementation("com.terraformersmc:modmenu:16.0.0-rc.1")
+
+    // Test dependencies
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testImplementation 'org.mockito:mockito-core:5.11.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.11.0'
+    testImplementation project(':common')
+}
+
+test {
+    useJUnitPlatform()
 }
 
 processResources {
