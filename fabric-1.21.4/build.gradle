@@ -1,6 +1,4 @@
-plugins {
-    id 'fabric-loom'
-}
+apply plugin: 'fabric-loom'
 
 // Minecraft 1.21.4 requires Java 21
 configureJavaVersion(21)
