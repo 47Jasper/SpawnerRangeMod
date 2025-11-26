@@ -1,6 +1,4 @@
-plugins {
-    id 'fabric-loom'
-}
+apply plugin: 'fabric-loom'
 
 // Minecraft 1.18+ requires Java 17
 configureJavaVersion(17)

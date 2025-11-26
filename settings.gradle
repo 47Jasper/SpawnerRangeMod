@@ -19,10 +19,6 @@ pluginManagement {
         gradlePluginPortal()
         mavenCentral()
     }
-    plugins {
-        id 'fabric-loom' version '1.11-SNAPSHOT'
-        id 'legacy-looming' version '1.0-SNAPSHOT'
-    }
 }
 
 rootProject.name = 'spawner-sphere-mod'

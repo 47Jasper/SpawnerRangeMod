@@ -1,7 +1,5 @@
-plugins {
-    id 'fabric-loom'
-    id 'legacy-looming'
-}
+apply plugin: 'fabric-loom'
+apply plugin: 'legacy-looming'
 
 dependencies {
     // Common module

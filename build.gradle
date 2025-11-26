@@ -1,9 +1,19 @@
-// Plugins are applied directly in subproject build.gradle files
-// This allows the common module to build/test independently
+buildscript {
+    repositories {
+        maven { url 'https://maven.fabricmc.net/' }
+        maven { url 'https://maven.legacyfabric.net/' }
+        maven { url 'https://maven.minecraftforge.net/' }
+        maven { url 'https://maven.neoforged.net/releases/' }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'net.fabricmc:fabric-loom:1.11-SNAPSHOT'
+        classpath 'net.legacyfabric:legacy-looming:1.0-SNAPSHOT'
+    }
+}
 
 allprojects {
-    apply plugin: 'java'
-
     group = 'com.example'
     version = '1.0.0'
 
@@ -16,15 +26,6 @@ allprojects {
         maven { url 'https://jitpack.io' }
     }
 
-    tasks.withType(JavaCompile) {
-        options.encoding = 'UTF-8'
-        // Java version is set per-subproject based on MC version requirements
-        // Default to Java 8 for older versions, but can be overridden
-        if (!project.hasProperty('javaVersion')) {
-            options.release = 8
-        }
-    }
-
     // Helper method to configure Java version for subprojects
     ext.configureJavaVersion = { int version ->
         java {
@@ -34,12 +35,20 @@ allprojects {
         }
         tasks.withType(JavaCompile) {
             options.release = version
+            options.encoding = 'UTF-8'
         }
     }
 }
 
 subprojects {
-    dependencies {
-        implementation 'org.joml:joml:1.10.5'
+    afterEvaluate {
+        dependencies {
+            implementation 'org.joml:joml:1.10.5'
+        }
+        if (!plugins.hasPlugin('fabric-loom')) {
+            tasks.withType(JavaCompile) {
+                options.encoding = 'UTF-8'
+            }
+        }
     }
 }
