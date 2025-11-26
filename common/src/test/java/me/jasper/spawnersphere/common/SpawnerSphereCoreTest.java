@@ -413,12 +413,6 @@ class SpawnerSphereCoreTest {
     @DisplayName("Config Integration")
     class ConfigIntegrationTests {
 
-        @BeforeEach
-        void setUp() {
-            when(mockPlatformHelper.getPlayerPosition(any())).thenReturn(new Position(0, 64, 0));
-            when(mockPlatformHelper.createBlockPos(anyInt(), anyInt(), anyInt())).thenReturn("mockBlockPos");
-        }
-
         @Test
         @DisplayName("should use sphere radius from config")
         void shouldUseSphereRadiusFromConfig() {
