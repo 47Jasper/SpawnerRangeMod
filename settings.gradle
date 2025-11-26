@@ -25,35 +25,64 @@ pluginManagement {
 
 rootProject.name = 'spawner-sphere-mod'
 
-// Common module
+// Loom version group selection - different Loom versions cannot be loaded together
+// Set via: ./gradlew build -PloomGroup=<group>
+// Groups: 'loom14' (1.14.4-1.19.4), 'loom18' (1.20.1-1.20.6), 'loom19' (1.21.1-1.21.4),
+//         'loom110' (1.21.5-1.21.8), 'loom111' (1.21.10), 'legacy', 'forge', 'all' (default, may conflict)
+def loomGroup = providers.gradleProperty('loomGroup').getOrElse('all')
+
+// Common module (always included)
 include 'common'
 
-// Fabric modules (sorted by MC version)
-include 'fabric-1.14.4'
-include 'fabric-1.15.2'
-include 'fabric-1.16.5'
-include 'fabric-1.17.1'
-include 'fabric-1.18.2'
-include 'fabric-1.19.2'
-include 'fabric-1.19.4'
-include 'fabric-1.20.4'
-include 'fabric-1.20.1'
-include 'fabric-1.20.6'
-include 'fabric-1.21.1'
-include 'fabric-1.21.3'
-include 'fabric-1.21.4'
-include 'fabric-1.21.5'
-include 'fabric-1.21.8'
-include 'fabric-1.21.10'
+// Fabric modules grouped by Loom version compatibility
+if (loomGroup == 'all' || loomGroup == 'loom14') {
+    // Loom 1.4-SNAPSHOT modules
+    include 'fabric-1.14.4'
+    include 'fabric-1.15.2'
+    include 'fabric-1.16.5'
+    include 'fabric-1.17.1'
+    include 'fabric-1.18.2'
+    include 'fabric-1.19.2'
+    include 'fabric-1.19.4'
+}
 
-// Legacy Fabric (MC 1.8.9-1.13.2)
-include 'legacy-fabric'
+if (loomGroup == 'all' || loomGroup == 'loom18') {
+    // Loom 1.8-SNAPSHOT modules
+    include 'fabric-1.20.1'
+    include 'fabric-1.20.4'
+    include 'fabric-1.20.6'
+}
 
-// Forge modules
-include 'forge-1.12'
-include 'forge-1.16'
-include 'forge-1.19'
-include 'forge-1.20'
+if (loomGroup == 'all' || loomGroup == 'loom19') {
+    // Loom 1.9-SNAPSHOT modules
+    include 'fabric-1.21.1'
+    include 'fabric-1.21.3'
+    include 'fabric-1.21.4'
+}
 
-// NeoForge modules
-include 'neoforge-1.20'
+if (loomGroup == 'all' || loomGroup == 'loom110') {
+    // Loom 1.10-SNAPSHOT modules
+    include 'fabric-1.21.5'
+    include 'fabric-1.21.8'
+}
+
+if (loomGroup == 'all' || loomGroup == 'loom111') {
+    // Loom 1.11-SNAPSHOT modules (MC 1.21.10+)
+    include 'fabric-1.21.10'
+}
+
+if (loomGroup == 'all' || loomGroup == 'legacy') {
+    // Legacy Fabric (MC 1.8.9-1.13.2)
+    include 'legacy-fabric'
+}
+
+if (loomGroup == 'all' || loomGroup == 'forge') {
+    // Forge modules
+    include 'forge-1.12'
+    include 'forge-1.16'
+    include 'forge-1.19'
+    include 'forge-1.20'
+
+    // NeoForge modules
+    include 'neoforge-1.20'
+}
