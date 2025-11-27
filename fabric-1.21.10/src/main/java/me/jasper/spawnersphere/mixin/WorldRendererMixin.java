@@ -3,9 +3,9 @@ package me.jasper.spawnersphere.mixin;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import me.jasper.spawnersphere.SpawnerSphereMod;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.FrameGraphBuilder;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.client.util.ObjectAllocator;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,11 +26,11 @@ public class WorldRendererMixin {
      * Inject at the end of the render method to render our spheres after translucent rendering.
      *
      * The render method signature in 1.21.10 is:
-     * render(FrameGraphBuilder, RenderTickCounter, boolean, Camera, Matrix4f, Matrix4f, Matrix4f, GpuBufferSlice, Vector4f, boolean)
+     * render(ObjectAllocator, RenderTickCounter, boolean, Camera, Matrix4f, Matrix4f, Matrix4f, GpuBufferSlice, Vector4f, boolean)
      */
     @Inject(method = "render", at = @At("TAIL"))
     private void onRenderWorld(
-            FrameGraphBuilder frameGraphBuilder,
+            ObjectAllocator objectAllocator,
             RenderTickCounter tickCounter,
             boolean renderBlockOutline,
             Camera camera,
