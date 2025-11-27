@@ -46,7 +46,10 @@ public class SpawnerSphereMod implements ClientModInitializer {
         core = new SpawnerSphereCore(platformHelper, renderer, config);
 
         // Register config screen (optional - only if Cloth Config is available)
-        ConfigScreenFactory.register(new ClothConfigScreen(config));
+        // Check for Cloth Config BEFORE instantiating ClothConfigScreen to avoid class loading errors
+        if (isClothConfigAvailable()) {
+            ConfigScreenFactory.register(new ClothConfigScreen(config));
+        }
 
         // Register keybinding
         toggleKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
@@ -109,5 +112,18 @@ public class SpawnerSphereMod implements ClientModInitializer {
      */
     public static SpawnerSphereCore getCore() {
         return core;
+    }
+
+    /**
+     * Check if Cloth Config is available without loading ClothConfigScreen class.
+     * This must be called BEFORE any reference to ClothConfigScreen to avoid ClassNotFoundException.
+     */
+    private static boolean isClothConfigAvailable() {
+        try {
+            Class.forName("me.shedaniel.clothconfig2.api.ConfigBuilder");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 }
