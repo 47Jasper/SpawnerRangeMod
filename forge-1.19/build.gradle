@@ -30,6 +30,7 @@ dependencies {
 }
 
 jar {
+    from(project(':common').sourceSets.main.output)
     manifest {
         attributes([
             "Specification-Title": "spawnersphere",
