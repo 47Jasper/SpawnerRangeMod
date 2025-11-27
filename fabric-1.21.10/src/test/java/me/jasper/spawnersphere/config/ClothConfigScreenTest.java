@@ -97,35 +97,9 @@ class ClothConfigScreenTest {
             }
         }
 
-        @Test
-        @DisplayName("should use config getters and setters")
-        void shouldUseConfigGettersAndSetters() {
-            // Set up mock returns for all config getters
-            when(mockConfig.getSphereRadius()).thenReturn(16);
-            when(mockConfig.getScanRadius()).thenReturn(64);
-            when(mockConfig.getScanInterval()).thenReturn(60000L);
-            when(mockConfig.getMovementThreshold()).thenReturn(16.0);
-            when(mockConfig.isShowDistanceInActionBar()).thenReturn(false);
-            when(mockConfig.isEnableSpatialIndexing()).thenReturn(true);
-            when(mockConfig.isEnableFrustumCulling()).thenReturn(false);
-            when(mockConfig.isEnableLOD()).thenReturn(true);
-            when(mockConfig.getLodMaxSegments()).thenReturn(32);
-            when(mockConfig.getLodMinSegments()).thenReturn(16);
-            when(mockConfig.getLodDistance()).thenReturn(32.0);
-            when(mockConfig.getSphereSegments()).thenReturn(24);
-            when(mockConfig.isRenderEquator()).thenReturn(true);
-
-            // Try to create screen - this may fail in test environment
-            // but config should still be accessed
-            try {
-                configScreen.createConfigScreen(null);
-            } catch (Exception e) {
-                // Expected in test environment without full Minecraft context
-            }
-
-            // Verify config getters were called during screen creation attempt
-            // At minimum, the isAvailable check should work
-        }
+        // Note: Testing config access during screen creation is not practical
+        // in a unit test environment because createConfigScreen requires
+        // the full Cloth Config API which isn't available without Minecraft.
     }
 
     @Nested
