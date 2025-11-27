@@ -1,7 +1,9 @@
 package me.jasper.spawnersphere.mixin;
 
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import me.jasper.spawnersphere.SpawnerSphereMod;
 import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.FrameGraphBuilder;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.client.render.WorldRenderer;
 import org.joml.Matrix4f;
@@ -28,14 +30,14 @@ public class WorldRendererMixin {
      */
     @Inject(method = "render", at = @At("TAIL"))
     private void onRenderWorld(
-            Object frameGraphBuilder,  // net.minecraft.client.render.FrameGraphBuilder (class_9922)
+            FrameGraphBuilder frameGraphBuilder,
             RenderTickCounter tickCounter,
             boolean renderBlockOutline,
             Camera camera,
             Matrix4f positionMatrix,
             Matrix4f projectionMatrix,
             Matrix4f inverseViewRotationMatrix,
-            Object gpuBufferSlice,  // com.mojang.blaze3d.buffers.GpuBufferSlice
+            GpuBufferSlice gpuBufferSlice,
             Vector4f fogColor,
             boolean bl,
             CallbackInfo ci
