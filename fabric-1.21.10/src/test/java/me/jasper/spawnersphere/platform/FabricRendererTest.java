@@ -15,6 +15,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -72,6 +74,7 @@ class FabricRendererTest {
 
     @Nested
     @DisplayName("renderSphere")
+    @MockitoSettings(strictness = Strictness.LENIENT)
     class RenderSphereTests {
 
         private FabricRenderer.RenderContext validContext;
