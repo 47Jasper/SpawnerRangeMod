@@ -50,7 +50,7 @@ public class ClothConfigScreen implements IConfigScreen {
             config.getScanRadius(),
             16, 256
         )
-        .setDefaultValue(64)
+        .setDefaultValue(32)
         .setTooltip(Text.literal("Radius to scan for spawners (blocks)"))
         .setSaveConsumer(config::setScanRadius)
         .build());
