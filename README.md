@@ -1,6 +1,8 @@
-# Spawner Sphere Mod
+# Spawner Sphere Mod - WIP
 
 A client-side Minecraft mod that displays a toggleable wireframe sphere around mob spawners, showing their 16-block activation range.
+
+Currently WIP, versions below 1.21.9 are non-functional
 
 ## Features
 
