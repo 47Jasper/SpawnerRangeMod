@@ -2,7 +2,7 @@
 
 A client-side Minecraft mod that displays a toggleable wireframe sphere around mob spawners, showing their 16-block activation range.
 
-Currently WIP, versions below 1.21.9 are non-functional
+Currently ONLY 1.21.9+ Fabric is supported! (personal project)
 
 ## Features
 
@@ -16,7 +16,7 @@ Currently WIP, versions below 1.21.9 are non-functional
 
 ## Version Support
 
-**14 modules supporting MC 1.8.9 → 1.21.10**
+**14 modules supporting MC 1.8.9 → 1.21.9+**
 
 ### Fabric (8 modules)
 - **legacy-fabric**: MC 1.8.9-1.13.2
@@ -50,15 +50,6 @@ Currently WIP, versions below 1.21.9 are non-functional
 ### Forge/NeoForge
 1. Install [Forge](https://files.minecraftforge.net/) or [NeoForge](https://neoforged.net/)
 2. Place mod JAR in `.minecraft/mods/`
-
-## Building
-
-Build specific version:
-```bash
-./gradlew :fabric-1.21.9:build  # MC 1.21.9-1.21.10
-./gradlew :fabric-1.21.5:build  # MC 1.21.5-1.21.8
-./gradlew :fabric-1.21:build    # MC 1.21.0-1.21.4
-./gradlew :forge-1.20:build     # MC 1.20-1.20.4
 ```
 
 Build all versions:
@@ -112,7 +103,7 @@ See `ARCHITECTURE.md` for detailed technical documentation.
 
 ## Testing
 
-**67 comprehensive unit tests** with ~100% coverage of core logic:
+**67 unit tests** with ~100% coverage of core logic:
 - ModConfigTest (10 tests)
 - SpatialIndexTest (10 tests)
 - LODCalculatorTest (10 tests)
@@ -128,7 +119,6 @@ Run tests:
 ## Performance
 
 - **Spatial Indexing**: Chunk-based HashMap (O(1) queries)
-- **Level of Detail**: 32→16 segments based on distance
 - **Frustum Culling**: Skip rendering off-screen spheres
 - **Lazy Scanning**: Movement/time-based triggers only
 
@@ -143,7 +133,7 @@ Pull requests welcome! For major changes, open an issue first.
 1. Fork repository
 2. Follow architecture in `ARCHITECTURE.md`
 3. Test thoroughly (see `TODO.md` for needed work)
-4. Submit PR with clear description
+4. Submit PR with **clear** description
 
 ## Credits
 
