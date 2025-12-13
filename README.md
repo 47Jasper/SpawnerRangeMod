@@ -50,7 +50,6 @@ Currently ONLY 1.21.9+ Fabric is supported! (personal project)
 ### Forge/NeoForge
 1. Install [Forge](https://files.minecraftforge.net/) or [NeoForge](https://neoforged.net/)
 2. Place mod JAR in `.minecraft/mods/`
-```
 
 Build all versions:
 ```bash
